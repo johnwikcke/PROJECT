@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pop - Recommendations</title>
+  <style>
+/* ===== Core Theme Variables (copied from index.html) ===== */
+:root {
+  --input-focus: #2d8cf0;
+  --font-color: #323232;
+  --font-color-sub: #666;
+  --bg-color: #f5f5f5;
+  --main-color: #111111;
+  --accent: #3f51b5;
+  --card: #ffffff;
+  --muted: #9e9e9e;
+  --danger: #f44336;
+  --success: #4caf50;
+  --warning: #ff9800;
+  --border-radius: 8px;
+  --shadow: 4px 4px var(--main-color);
+  --transition: all 0.3s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #121212;
+    --card: #1e1e1e;
+    --font-color: #f5f5f5;
+    --font-color-sub: #9e9e9e;
+    --main-color: #798a90;
+  }
+}
+
+
+
+
+
+
+
+/* Header card style to match index.html */
+.header-card {
+  background-color: var(--card);
+  border: 2px solid var(--main-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 12px 16px;
+  margin: 34px auto;
+  max-width: 330px;
+  box-sizing: border-box;
+}
+
+.app-header { display:flex; align-items:center; gap:10px; }
+.app-title { color: var(--font-color); font-weight:900; font-size:1.1rem; }
+#back-button { display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
+
+
+
+
+
+
+
+/* ===== Base Layout ===== */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--font-color);
+  background-color: var(--bg-color);
+  transition: var(--transition);
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  max-width: 100%;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+h2 {
+  font-size: 1.4rem;
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+
+/* ===== Buttons & Inputs ===== */
+.btn {
+  display: inline-block;
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  border: 2px solid var(--main-color);
+  background-color: var(--card);
+  color: var(--font-color);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+.btn:hover { background-color: var(--accent); color: #fff; }
+.btn.delete { border-color: var(--danger); color: var(--danger); }
+
+select, input[type="text"] {
+  width: 90%;
+  padding: 10px;
+  border: 2px solid var(--main-color);
+  border-radius: var(--border-radius);
+  background-color: var(--card);
+  color: var(--font-color);
+  box-shadow: var(--shadow);
+}
+
+/* ===== Filters Panel (recommendation specific) ===== */
+
+
+
+/* --- Make the filter card smaller and centered --- */
+.filters-panel {
+  max-width: 330px;        /* don't let it stretch full width */
+  margin: 34px auto;       /* add space left/right and center horizontally */
+  padding: 14px;           /* keep inside padding */
+  border-radius: 12px;     /* softer corners */
+}
+
+/* also tighten result card to match */
+.result-panel {
+  max-width: 330px;
+  margin: 16px auto;
+  padding: 14px;
+  border-radius: 12px;
+}
+
+
+
+
+
+
+
+
+.filters-panel {
+  background-color: var(--card);
+  border: 2px solid var(--main-color);
+  box-shadow: var(--shadow);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.filter-group { margin-bottom: 12px; }
+.filter-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.tag-checkbox { display: none; }
+.tag-label {
+  padding: 6px 12px;
+  background-color: var(--card);
+  border: 2px solid var(--main-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.tag-checkbox:checked + .tag-label {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+/* ===== AI Toggle ===== */
+.ai-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toggle-switch { position: relative; width: 50px; height: 24px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--muted);
+  transition: .4s;
+  border-radius: 24px;
+}
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .toggle-slider { background-color: var(--accent); }
+input:checked + .toggle-slider:before { transform: translateX(26px); }
+
+/* ===== Result Panel ===== */
+.result-panel {
+  background-color: var(--card);
+  border: 2px solid var(--main-color);
+  box-shadow: var(--shadow);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  margin-top: 16px;
+  text-align: center;
+}
+.result-poster {
+  width: 150px; height: 225px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+  border: 2px solid var(--main-color);
+  box-shadow: var(--shadow);
+  margin: 0 auto 16px;
+}
+.result-title {
+  font-size: 1.2rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  color: var(--font-color);
+}
+.result-description {
+  color: var(--font-color-sub);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+
+
+
+/* --- Buttons: match index.html look --- */
+.btn, .btn-primary, .btn-secondary {
+  display: inline-block;
+  padding: 8px 12px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 2px solid var(--main-color);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+  color: var(--font-color);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.25);
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .06s ease;
+}
+.btn:active, .btn-primary:active, .btn-secondary:active { transform: translateY(2px); box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+.btn-primary { background-color: var(--accent); color: #fff; border-color: rgba(0,0,0,0.35); }
+.btn-secondary { background-color: transparent; color: var(--font-color); }
+
+/* --- Back button style --- */
+#back-button {
+  width: 40px;
+  height: 36px;
+  border-radius: 6px;
+  border: 2px solid var(--main-color);
+  background: var(--card);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.25);
+}
+
+/* --- Filters layout tweaks --- */
+.filters-panel { padding: 14px; gap: 8px; }
+.filter-group { margin-bottom: 10px; }
+.filter-select, .filter-input { padding: 8px; border-radius: 8px; }
+
+/* --- Tag pills smaller --- */
+.tag-label {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  border-width: 2px;
+}
+
+/* --- Result card compact --- */
+.result-panel {
+  max-width: 520px;     /* limit width */
+  margin: 16px auto;    /* center */
+  padding: 14px;
+  border-radius: 12px;
+}
+.result-poster {
+  width: 120px;         /* smaller poster */
+  height: 180px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 2px solid rgba(0,0,0,0.35);
+}
+
+/* --- Title + description sizing --- */
+.result-title { font-size: 1.05rem; margin: 6px 0; }
+.result-description { font-size: 0.94rem; line-height: 1.45; color: var(--font-color-sub); }
+
+/* --- View Details button style inside card --- */
+#open-detail-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid rgba(0,0,0,0.35);
+  background: var(--card);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+  font-weight: 700;
+}
+
+/* --- Clear filters button small --- */
+#clear-filters { padding: 8px 12px; border-radius: 8px; }
+
+/* --- Responsive tweaks for narrow screens --- */
+@media (max-width:420px) {
+  .result-panel { margin-left: 15px; margin-right: 15px; max-width: calc(100% - 20px); }
+  .result-poster { width: 110px; height: 165px; }
+  .filters-panel { padding: 12px; }
+}
+
+
+
+
+
+
+
+
+/* ===== States ===== */
+.no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--font-color-sub);
+}
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: var(--accent);
+  animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header card (drop-in) -->
+<div class="header-card" style="max-width:330px;margin:12px auto;padding:8px 12px;">
+  <div class="app-header" style="display:flex;align-items:center;gap:12px;">
+    <button id="back-button" class="btn" aria-label="Back" style="width:40px;height:36px;padding:0;border-radius:8px;">
+      ←
+    </button>
+    <span class="app-title" style="font-size:1.125rem;font-weight:900;">Pop - Recommendations</span>
+  </div>
+</div>
+
+      <div class="header-actions">
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="filters-panel">
+        <div class="filter-group">
+          <label for="category">Category</label>
+          <select id="category" class="filter-select">
+            <option value="all">All</option>
+            <option value="movie">Movie</option>
+            <option value="anime">Anime</option>
+            <option value="tv">TV Show</option>
+            <option value="web">Web Series</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="status">Status</label>
+          <select id="status" class="filter-select">
+            <option value="all">All</option>
+            <option value="watching">Watching</option>
+            <option value="planned">Planned</option>
+            <option value="finished">Finished</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Tags</label>
+          <div id="tags-container" class="tags-container">
+            <!-- Tags will be dynamically inserted here -->
+          </div>
+        </div>
+        
+        <div class="filter-group">
+          <label for="search">Search</label>
+          <input type="text" id="search" class="filter-input" placeholder="Search titles and descriptions...">
+        </div>
+        
+        <div class="filter-group ai-toggle">
+          <div class="toggle-switch">
+            <input type="checkbox" id="ai-toggle">
+            <span class="toggle-slider"></span>
+          </div>
+          <label for="ai-toggle">AI-Assisted Selection</label>
+        </div>
+        
+        <button id="recommend-btn" class="btn-primary">Find Recommendation</button>
+      </div>
+      
+      <div id="result" class="result-panel hidden">
+        <!-- Result will be shown here -->
+      </div>
+      
+      <div id="no-results" class="no-results hidden">
+        <h3>No shows match your filters</h3>
+        <button id="clear-filters" class="btn-secondary">Clear Filters</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="recommend.js"></script>
+</body>
+</html>

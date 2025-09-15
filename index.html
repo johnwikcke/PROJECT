@@ -1,0 +1,4408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#3f51b5">
+  <title>Pop - Watch Tracker</title>
+  <link rel="manifest"
+    href="data:application/json;base64,ewogICJuYW1lIjogIlBvcCAtIFdhdGNoIFRyYWNrZXIiLAogICJzaG9ydF9uYW1lIjogIlBvcCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjM2Y1MWI1IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaWNvbi0xOTJ4MTkyLnBuZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfQogIF0KfQ==">
+  <style>
+    :root {
+      --input-focus: #2d8cf0;
+      --font-color: #323232;
+      --font-color-sub: #666;
+      --bg-color: #f5f5f5;
+      --main-color: #111111;
+      --accent: #3f51b5;
+      --card: #ffffff;
+      --muted: #9e9e9e;
+      --danger: #f44336;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --border-radius: 8px;
+      --shadow: 4px 4px var(--main-color);
+      --transition: all 0.3s ease;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #121212;
+        --card: #1e1e1e;
+        --font-color: #f5f5f5;
+        --font-color-sub: #9e9e9e;
+        --main-color: #798a90;
+      }
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --card: #1e1e1e;
+      --font-color: #f5f5f5;
+      --font-color-sub: #9e9e9e;
+      --main-color: #f5f5f5;
+    }
+
+    [data-theme="light"] {
+      --bg-color: #f5f5f5;
+      --card: #ffffff;
+      --font-color: #323232;
+      --font-color-sub: #666;
+      --main-color: #212121;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--font-color);
+      background-color: var(--bg-color);
+      background-color: #212121;
+      transition: var(--transition);
+      padding: 16px;
+    }
+
+    .app-container {
+      max-width: 100%;
+      min-height: 100vh;
+      padding-bottom: 60px;
+      /* Space for FAB */
+    }
+
+    /* Header */
+
+
+    .header-card {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 1000;
+    }
+
+    /* combined header card */
+    .header-card {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      top: 16px;
+      z-index: 1000;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 2px solid var(--main-color);
+      background: var(--card);
+    }
+
+    /* make existing header be the top part */
+    .header-card .app-header {
+      border-radius: 0;
+      margin: 0;
+      padding-bottom: 8px;
+      border: none;
+      background: transparent;
+    }
+
+    /* make tabs sit flush as the bottom part of same card */
+    .header-card .tabs {
+      position: relative;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+      margin: 0;
+      border: none;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    /* ensure header-actions sit inside the combined card */
+    .header-card .header-actions {
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      position: absolute;
+    }
+
+    /* adjust content offset variable so content doesn't hide behind combined header */
+    :root {
+      --header-tabs-offset: 120px;
+    }
+
+    /* tweak if needed based on header height */
+
+    /* when wrapped, make inner header/tabs non-fixed and flow inside wrapper */
+    .header-card .app-header,
+    .header-card .tabs {
+      position: static !important;
+      left: auto !important;
+      right: auto !important;
+      top: auto !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      background: transparent !important;
+    }
+
+    /* restore visual borders for inner parts but avoid double outline */
+    .header-card .app-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .header-card .tabs {
+      border-top: 0;
+      display: flex;
+    }
+
+    /* ensure header-actions remain positioned inside wrapper */
+    .header-card .header-actions {
+      position: absolute !important;
+      top: 25%;
+      transform: translateY(-50%);
+      right: 12px;
+      z-index: 6;
+    }
+
+    /* Give header a unique background */
+    .header-card {
+      background: linear-gradient(135deg, #000000, #000000);
+      /* example blue gradient */
+      color: #fff;
+      /* ensure text/icons are readable */
+      border-color: #77878d;
+      /* adjust border tone to match */
+    }
+
+    /* override header text inside */
+    .header-card .app-header h1 {
+      color: #90a8f1;
+    }
+
+    .header-card .header-actions .header-fab {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-color: #fff;
+    }
+
+    .header-card .tabs {
+      background: transparent;
+    }
+
+    .header-card .tab {
+      color: #fff;
+    }
+
+    .header-card .tab.active {
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom-color: #3f51b5;
+      /* accent line */
+    }
+
+
+    /* ensure content offset matches wrapper height (adjust if needed) */
+    :root {
+      --header-tabs-offset: 120px;
+    }
+
+
+
+
+
+
+
+
+    /* layout size fixes */
+.detail-header-card { gap: 12px; padding: 10px; }
+.detail-poster { width: 120px; height: 180px; border-radius: 6px; }
+.detail-meta { gap: 4px; padding-right: 8px; }
+
+/* title and submeta sizing */
+.detail-title { font-size: 1.2rem; line-height: 3.05; }
+.detail-submeta { font-size: 0.9rem; }
+
+/* action buttons: prevent overlap and shrink */
+.detail-actions { display:flex; gap: 8px; align-items:flex-start; }
+.detail-actions .btn { padding:6px 8px; font-size:0.8rem; border-radius:6px; }
+
+/* progress bar full width and spacing */
+.detail-header-card + .detail-main .detail-info .row + div,
+.detail-header-card .detail-submeta { margin-top:8px; }
+.detail-info { font-size:0.95rem; padding:10px; }
+
+/* episode column size and scrolling */
+.detail-episodes { width: 300px; min-width: 260px; max-width:340px; padding:10px; }
+@media (max-width:880px) {
+  .detail-episodes { width: 100%; max-height: none; }
+}
+
+/* episode chips sizing */
+.episode-chip { width:36px; height:36px; line-height:36px; font-weight:700; border-radius:6px; margin:6px; }
+.episode-chip.watched { opacity:0.85; transform: none; }
+
+/* season header compact */
+.season-header { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; }
+.season-title { font-weight:700; font-size:0.95rem; }
+
+/* card border and padding consistency */
+.detail-header-card, .detail-info, .detail-episodes { border-width:1.5px; border-radius:8px; }
+
+/* avoid poster overflow on very small screens */
+@media (max-width:420px) {
+  .detail-poster { width:300px; height:144px; }
+  .detail-title { font-size:1rem; }
+  .episode-chip { width:32px; height:32px; line-height:32px; font-size:0.85rem; }
+}
+
+
+
+
+
+
+
+
+
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.detail-poster-img {
+  width: 121px;      /* adjust size as you like */
+  height: auto;      /* keep aspect ratio */
+  border-radius: 6px;
+  border: 2px solid var(--main-color);
+  box-shadow: var(--shadow);
+  object-fit: contain; /* full poster, no crop */
+  background: #000;
+  --main-color: #ffffff;
+}
+
+/* Delete button red styling */
+.detail-actions .btn.delete {
+  border: 1.5px solid #e63946;
+  color: #e63946;
+  background: transparent;
+}
+.detail-actions .btn.delete:hover {
+  background: #e63946;
+  color: #fff;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.detail-header-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1.5px solid var(--main-color);
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.detail-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.detail-actions .btn {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
+.detail-header-card-inner {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.element.style {
+    display: flex;
+    gap: 60px;
+    align-items: flex-start;
+}
+
+
+
+
+
+
+
+
+
+
+/* Style the "About" heading */
+.detail-info > .row:first-of-type strong {
+  color: #ffffff;   /* heading color */
+  font-weight: 900;
+}
+
+/* Style the description text under About */
+.detail-info > div[style*="margin-bottom:12px"] {
+  color: #cccccc;         /* pick your text color */
+  font-size: 0.95rem;     /* adjust if you want smaller/larger */
+  line-height: 1.4;
+}
+
+
+
+
+
+
+
+
+
+
+
+    .app-header {
+      background-color: var(--card);
+      background-color: #111111;
+      color: var(--font-color);
+      color: #abd5e3;
+      padding: 16px;
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      top: 16px;
+      z-index: 1000;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      border-radius: var(--border-radius);
+      margin-bottom: 0px;
+    }
+
+    .app-header h1 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      display: inline-block;
+    }
+
+
+    /* header search */
+    .header-search {
+      width: 220px;
+      max-width: 40vw;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 2px solid var(--main-color);
+      background: var(--card);
+      color: var(--font-color);
+      font-weight: 600;
+      box-shadow: var(--shadow);
+      outline: none;
+      transition: box-shadow .18s ease, transform .12s ease;
+    }
+
+    .header-search:focus {
+      box-shadow: 0 0 0 4px rgba(63, 81, 181, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .header-actions .search-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width:520px) {
+      .header-search {
+        width: 140px;
+        max-width: 36vw;
+      }
+    }
+
+    /* collapsed search style */
+    .header-search.collapsed {
+      width: 0;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: width 0.2s ease, opacity 0.2s ease;
+    }
+
+    /* expanded state */
+    .search-wrapper.active .header-search {
+      width: 180px;
+      padding: 8px 10px;
+      border: 2px solid var(--main-color);
+      background: var(--card);
+      opacity: 1;
+      pointer-events: auto;
+      box-shadow: var(--shadow);
+    }
+
+    /* hide/show helper used by JS */
+    .hidden {
+      display: none !important;
+    }
+
+    /* header action buttons */
+    .header-actions {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* reuse FAB visuals but reduce size for header */
+    .header-fab {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--card);
+      color: var(--font-color);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .header-fab:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px) translateY(-50%);
+    }
+
+    /* prevent global fixed FAB rules from conflicting when in header */
+    .app-header .fab {
+      position: static;
+      right: auto;
+      bottom: auto;
+      z-index: 101;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background-color: var(--card);
+      background-color: #111111;
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      z-index: 1000;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      border-radius: var(--border-radius);
+      margin: 0;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .tab.active {
+      border-bottom: 2px solid var(--accent);
+      background-color: rgba(45, 140, 240, 0.1);
+    }
+
+    /* Content */
+    .content {
+      padding-top: var(--header-tabs-offset);
+      margin-top: 30px;
+    }
+
+    /* Show List */
+    .show-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Show Card */
+    .show-card {
+      background-color: var(--card);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .show-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .show-title {
+      font-size: 1.2rem;
+      font-weight: 900;
+    }
+
+    .show-type {
+      background-color: var(--accent);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .show-progress {
+      margin-bottom: 12px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background-color: var(--muted);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid var(--main-color);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background-color: var(--accent);
+      border-radius: 4px;
+    }
+
+    .progress-text {
+      font-size: 0.875rem;
+      color: var(--font-color-sub);
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .show-subtitle {
+      font-size: 0.875rem;
+      color: var(--font-color-sub);
+      font-weight: 600;
+    }
+
+    /* Show Detail */
+
+
+
+
+
+
+
+    .show-detail {
+
+      position: fixed; /* lock to viewport */
+  top: 152px;
+  left: 18px;
+  right: 18px;
+  bottom: 24px;
+  overflow: auto; /* allow scrolling inside the panel */
+  -webkit-overflow-scrolling: touch;
+
+      background-color: var(--card);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      background: var(--card);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      color: var(--font-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .btn:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    .season-accordion {
+      margin-bottom: 18px;
+      background: var(--card);
+      padding: 12px;
+      border-radius: var(--border-radius);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    .season-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .season-title {
+      font-weight: 900;
+      font-size: 1rem;
+    }
+
+    .season-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--font-color-sub);
+      font-weight: 600;
+    }
+
+    .episodes-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+    }
+
+    @media (max-width:720px) {
+      .episodes-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    @media (max-width:420px) {
+      .episodes-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    .episode-chip {
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--card);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 900;
+      color: var(--font-color);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      user-select: none;
+    }
+
+    .episode-chip:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    .episode-chip:focus {
+      outline: 3px solid rgba(63, 81, 181, 0.16);
+      outline-offset: 2px;
+    }
+
+    .episode-chip.watched {
+      background-color: var(--accent);
+      color: #fff;
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-color: var(--card);
+      background-color: #abd5e3;
+      background-color: #111111;
+      color: var(--font-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      z-index: 1000;
+      transition: all 0.2s ease;
+    }
+
+    .fab:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+
+
+
+
+
+
+
+/* make outer card fixed height and non-scrollable */
+.my-shows-card {
+  background: #212121;
+  border: 2px solid #212121;
+  color: var(--text-color);
+  position: relative;
+  height: calc(100vh - var(--header-tabs-offset) - 24px); /* adjust if header height differs */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* outer card won't scroll */
+}
+
+/* inner scroll area: the only scrollable element */
+.shows-scroll {
+  flex: 1 1 auto;
+  height: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+  overscroll-behavior: contain;      /* prevent scroll from escaping to body */
+  touch-action: pan-y;               /* prefer vertical pan inside this element */
+}
+
+
+
+
+/* ensure outer card doesn't scroll and inner area can */
+#my-shows-card { position: relative; overflow: hidden; }
+#shows-scroll {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  height: 650px; /* fallback until JS runs */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .modal {
+      background-color: var(--card);
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      padding: 16px;
+      border-bottom: 2px solid var(--main-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-weight: 900;
+      color: var(--font-color);
+    }
+
+    .modal-body {
+      padding: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 900;
+      color: var(--font-color);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--main-color);
+      border-radius: var(--border-radius);
+      background-color: var(--card);
+      color: var(--font-color);
+      box-shadow: var(--shadow);
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border: 2px solid var(--input-focus);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--font-color-sub);
+      opacity: 0.8;
+    }
+
+    .modal-footer {
+      padding: 16px;
+      border-top: 2px solid var(--main-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      padding: 10px 20px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 900;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    .btn-secondary {
+      background-color: var(--card);
+      color: var(--font-color);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      padding: 10px 20px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--card);
+      color: var(--font-color);
+      padding: 12px 24px;
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      z-index: 1001;
+    }
+
+    .toast-message {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    .toast-action {
+      color: var(--accent);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    /* Settings */
+    .settings-drawer {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background-color: var(--card);
+      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      transition: right 0.3s ease;
+      padding: 16px;
+      overflow-y: auto;
+      border-left: 2px solid var(--main-color);
+    }
+
+    .settings-drawer.open {
+      right: 0;
+    }
+
+    .settings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--main-color);
+    }
+
+    .settings-header h2 {
+      font-weight: 900;
+      color: var(--font-color);
+    }
+
+    .settings-option {
+      margin-bottom: 16px;
+    }
+
+    .settings-option label {
+      font-weight: 900;
+      color: var(--font-color);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+
+
+
+#shows-scroll::-webkit-scrollbar { width: 8px; }
+#shows-scroll::-webkit-scrollbar-track { background: transparent; }
+#shows-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+#shows-scroll { scrollbar-width: none; } /* Firefox */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* Dashboard stat cards */
+    .dashboard-card {
+      background: #212121;
+      border: 2px solid #212121;
+      color: var(--text-color);
+      border-radius: 12px;
+      padding: 0px;
+      box-shadow: #212121;
+      box-shadow: 4px 4px #212121;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dashboard-card h3 {
+      font-size: 1rem;
+      font-weight: 900;
+      margin: 0;
+      color: var(--font-color);
+    }
+
+    .dashboard-value {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .dashboard-sub {
+      color: var(--font-color-sub);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    /* small table style for breakdown */
+    .dashboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-weight: 700;
+      color: var(--font-color);
+    }
+
+    .dashboard-table td,
+    .dashboard-table th {
+      padding: 8px;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.03);
+      text-align: left;
+    }
+
+    .dashboard-kpi-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* responsiveness */
+    @media (max-width:640px) {
+      #dashboard-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+
+
+    /* replace using .hidden for file inputs */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--font-color-sub);
+      background-color: var(--card);
+      border-radius: var(--border-radius);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    .empty-state h2 {
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    /* Focus styles for accessibility */
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+      }
+    }
+
+    /* Season episode inputs */
+    .season-episodes-container {
+      margin-bottom: 16px;
+    }
+
+    .season-episode-input {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .season-episode-input label {
+      margin-bottom: 0;
+      margin-right: 8px;
+      min-width: 100px;
+      font-weight: 600;
+    }
+
+    /* Back button in detail view */
+    .detail-header-with-back {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .detail-back-button {
+      background: var(--card);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      color: var(--font-color);
+      padding: 8px 10px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      min-width: 56px;
+      transition: all 0.2s ease;
+    }
+
+    .detail-back-button:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    .detail-title-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+    }
+
+    .detail-title {
+      color: var(--font-color);
+      --font-color: #90a8f1;
+      font-size: 1rem;
+      font-weight: 900;
+      margin-left: 8px;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 190px;
+      align-items: center;
+    }
+
+    .detail-actions .btn {
+      background: var(--card);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      color: var(--font-color);
+      padding: 8px 10px;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .detail-actions .btn:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    .detail-actions .btn.delete {
+      background: var(--card);
+      border: 2px solid var(--danger);
+      color: var(--danger);
+    }
+
+    /* FEATURE: POSTER upload */
+    .poster-preview {
+      width: 100px;
+      height: 150px;
+      background-color: var(--muted);
+      border-radius: var(--border-radius);
+      background-size: cover;
+      background-position: center;
+      margin-bottom: 12px;
+      position: relative;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    .poster-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    .show-card-poster {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.2;
+      z-index: 0;
+    }
+
+    .show-card-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* FEATURE: SORT control */
+    .sort-control {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      background-color: var(--card);
+      border-bottom: 2px solid var(--main-color);
+      position: sticky;
+      top: 104px;
+      z-index: 80;
+      box-shadow: var(--shadow);
+      border-radius: var(--border-radius);
+      margin-bottom: 16px;
+    }
+
+    .sort-control label {
+      margin-right: 8px;
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+
+    .sort-control select {
+      width: auto;
+      padding: 6px 8px;
+    }
+
+    /* FEATURE: Season complete button */
+    .season-complete-btn {
+      background: var(--accent);
+      color: white;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      padding: 8px 1px;
+      border-radius: var(--border-radius);
+      font-size: -0.15rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .season-complete-btn:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    /* Small spacing fixes */
+    .show-progress {
+      margin-bottom: 12px;
+    }
+
+    .detail-back-button+.detail-title-wrap {
+      margin-left: 0;
+    }
+
+    /* FEATURE: Confirm delete modal */
+    .confirm-modal {
+      background-color: var(--card);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      max-width: 400px;
+      margin: 100px auto;
+      text-align: center;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    .confirm-modal h3 {
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .confirm-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    /* FEATURE: Import/export fallback */
+    #settings-drawer .settings-option {
+      margin-bottom: 18px;
+    }
+
+    /* Make import/export fallback visible and touch-friendly */
+    #export-fallback,
+    #import-fallback {
+      background: var(--card);
+      padding: 12px;
+      border-radius: var(--border-radius);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    /* JSON textarea */
+    #export-json,
+    #import-json {
+      width: 100%;
+      min-height: 160px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      padding: 10px;
+      border-radius: var(--border-radius);
+      box-sizing: border-box;
+      resize: vertical;
+      color: var(--font-color);
+      background: var(--card);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    /* Full-width easy-tap buttons inside settings drawer */
+    #settings-drawer button,
+    #settings-drawer .btn-secondary,
+    #settings-drawer .btn-primary {
+      width: 100%;
+      display: block;
+      padding: 10px 40px;
+      font-size: 0.95rem;
+      border-radius: var(--border-radius);
+      box-sizing: border-box;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+      font-weight: 600;
+    }
+
+    #settings-drawer button:active,
+    #settings-drawer .btn-secondary:active,
+    #settings-drawer .btn-primary:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    /* small text link style for import hint */
+    #settings-drawer #import-data {
+      background: var(--card);
+      color: var(--font-color);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      padding: 10px 12px;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    /* ===== Add / Edit Modal improvements ===== */
+    .modal {
+      max-width: 520px;
+      padding-bottom: 8px;
+    }
+
+    /* modal header and title */
+    .modal-header h2 {
+      font-size: 1.25rem;
+      margin: 0;
+      font-weight: 900;
+    }
+
+    /* form spacing */
+    .modal-body {
+      padding: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    /* inputs visual */
+    input,
+    select,
+    textarea {
+      background-color: var(--card);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      color: var(--font-color);
+      padding: 10px 12px;
+      border-radius: var(--border-radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    /* nicer placeholder contrast */
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--font-color-sub);
+    }
+
+    /* number inputs compact */
+    input[type="number"] {
+      max-width: 120px;
+      text-align: center;
+      display: inline-block;
+    }
+
+    /* episode inputs inside season editor */
+    .season-episode-input {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .season-episode-input label {
+      min-width: 130px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .season-episode-input input[type="number"] {
+      max-width: 110px;
+    }
+
+    /* Poster preview and buttons layout */
+    .poster-preview {
+      width: 110px;
+      height: 160px;
+      border-radius: var(--border-radius);
+      background-color: var(--card);
+      display: block;
+      margin-bottom: 10px;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+    }
+
+    #poster-select-btn,
+    #poster-use-url,
+    #poster-remove-btn {
+      margin: 6px 6px 0 0;
+      padding: 8px 10px;
+      border-radius: var(--border-radius);
+      font-size: 0.9rem;
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    #poster-select-btn:active,
+    #poster-use-url:active,
+    #poster-remove-btn:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    /* arrange poster controls horizontally on wide screens, stacked on small screens */
+    .poster-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    @media (min-width:420px) {
+      .poster-controls {
+        flex-wrap: nowrap;
+        align-items: flex-start;
+      }
+    }
+
+    /* modal footer buttons */
+    .modal-footer {
+      padding: 12px 16px;
+      gap: 10px;
+      border-top: 2px solid var(--main-color);
+    }
+
+    .btn-primary {
+      min-width: 120px;
+      padding: 10px 14px;
+      border-radius: var(--border-radius);
+    }
+
+    /* Auto-fetch UI styles */
+    .form-hint {
+      color: var(--font-color-sub);
+      font-size: 0.85rem;
+      margin-top: 4px;
+      display: block;
+    }
+
+    .search-result {
+      margin-bottom: 8px;
+    }
+
+    .search-result button {
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: var(--border-radius);
+      background: var(--card);
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      color: var(--font-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .search-result button:hover {
+      background-color: rgba(63, 81, 181, 0.1);
+    }
+
+    .search-result button.active {
+      background-color: var(--accent);
+      color: white;
+    }
+
+    .search-result button:active {
+      box-shadow: 0px 0px var(--main-color);
+      transform: translate(3px, 3px);
+    }
+
+    #auto-results {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    #auto-preview {
+      background: var(--card);
+      border: 2px solid var(--main-color);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    #auto-preview img {
+      border-radius: var(--border-radius);
+    }
+
+    .btn-primary {
+      font-weight: 900;
+    }
+
+    .btn-secondary {
+      min-width: 100px;
+      padding: 10px 12px;
+      border-radius: var(--border-radius);
+      background: var(--card);
+      font-weight: 600;
+    }
+
+    /* make small helper text consistent */
+    .form-group small,
+    .form-hint {
+      display: block;
+      color: var(--font-color-sub);
+      margin-top: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* ensure hidden class works for overlays */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Accessibility: larger tap targets on mobile */
+    @media (max-width:480px) {
+      .modal {
+        margin: 12px;
+        max-width: calc(100% - 24px);
+      }
+
+      .header-actions .header-fab {
+        width: 44px;
+        height: 44px;
+      }
+
+      .fab {
+        width: 56px;
+        height: 56px;
+      }
+    }
+
+    /* FEATURE: Multi-season episode editor */
+    .season-editor {
+      border: 2px solid var(--main-color);
+      box-shadow: var(--shadow);
+      border-radius: var(--border-radius);
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .episode-editor {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .episode-editor label {
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+
+    /* FEATURE: Context menu */
+    .context-menu {
+      position: fixed;
+      background: var(--card);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      z-index: 2000;
+      padding: 8px 0;
+      min-width: 180px;
+      border: 2px solid var(--main-color);
+    }
+
+    .context-menu-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+    }
+
+    .context-menu-item:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* ===== Toast / Snackbar ===== */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card);
+      color: var(--font-color);
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      font-size: 0.95rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 2000;
+      animation: fadeInUp 0.25s ease-out;
+      border: 2px solid var(--main-color);
+    }
+
+    #toast.hidden {
+      display: none !important;
+    }
+
+    /* Undo button inside toast */
+    #toast-action {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      font-weight: 900;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    #toast-action:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* toast message text */
+    #toast-message {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    /* animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    /* Fix select dropdown visibility */
+    select {
+      background-color: var(--card);
+      color: var(--font-color);
+    }
+
+    /* Ensure options render with proper background */
+    select option {
+      background-color: var(--card);
+      color: var(--font-color);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1>Pop</h1>
+
+      <!-- moved buttons -->
+      <div class="header-actions">
+
+        <div class="search-wrapper" role="search">
+          <input id="header-search" class="header-search" type="search" placeholder="Search shows..."
+            aria-label="Search shows">
+        </div>
+
+
+
+ 
+        <button class="fab header-fab" id="add-show-fab" aria-label="Add">
+          <!-- Plus icon SVG (unchanged) -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      
+
+
+        <!-- replace whatever header-fab you have in header-actions with this -->
+<button class="header-fab" id="profile-btn" aria-label="Profile">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+    <circle cx="12" cy="7" r="4"></circle>
+  </svg>
+</button>
+
+      </div>
+
+    </header>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="watching">Watching</div>
+      <div class="tab" data-tab="planned">Planned</div>
+      <div class="tab" data-tab="finished">Finished</div>
+      <div class="tab" data-tab="all">All</div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+    <main class="content">
+  <div class="dashboard-card shows-outer-card" id="my-shows-card">
+    <div class="shows-card-title">
+
+    <!-- single scrollable area that will contain all .show-card items -->
+    <div id="shows-scroll" class="shows-scroll">
+      <div class="show-list" id="show-list">
+        <!-- Shows will be rendered here -->
+        <div class="empty-state" id="empty-state">
+          <h2>No shows added yet</h2>
+          <p>Get started by adding your first show</p>
+          <button class="btn-primary mt-16" id="add-first-show">Add Show</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- keep detail inside the card (hidden until needed) -->
+    <div class="show-detail hidden" id="show-detail">
+      <!-- Show detail will be rendered here -->
+    </div>
+
+    
+  </div>
+</main>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+    <button class="fab" id="add-show-fab" style="bottom: 1190px;">
+      <!-- Plus icon  -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </button>
+
+    <button class="fab" id="settings-fab" style="bottom: 1156px;">
+      <!-- Settings icon  -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+        </path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Add/Edit Modal (REPLACE existing block) -->
+  <div class="modal-backdrop hidden" id="add-edit-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">Add Show</h2>
+        <button class="btn" id="close-modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- STEP 0: Choose Auto or Manual -->
+        <div id="add-mode-choice" class="form-group">
+          <label>Choose add mode</label>
+          <div style="display:flex;gap:8px;">
+            <button id="choose-auto" class="btn-primary" type="button">Auto</button>
+            <button id="choose-manual" class="btn-secondary" type="button">Manual</button>
+          </div>
+          <small class="form-hint">Auto will fetch seasons/episodes/runtime from Pop. Manual opens the full form as
+          before.</small>
+      </div>
+
+        <!-- AUTO PANEL -->
+        <div id="auto-panel" class="hidden">
+          <div class="form-group">
+            <label for="auto-query">Search title</label>
+            <input id="auto-query" type="text" placeholder="e.g. Naruto, Breaking Bad">
+          </div>
+
+          <div class="form-group">
+            <label for="auto-type">Type</label>
+            <select id="auto-type">
+              <option value="tv">TV Show</option>
+              <option value="anime">Anime</option>
+              <option value="movie">Movie</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <button id="auto-search-btn" class="btn-primary" type="button">Search With Pop</button>
+          </div>
+
+          <div id="auto-results" class="form-group"></div>
+
+          <div id="auto-preview" class="form-group"></div>
+
+          <div style="display:flex;gap:8px;">
+            <button id="auto-fetch-btn" class="btn-primary" type="button" disabled>Fetch details & Prefill</button>
+            <button id="auto-back-btn" class="btn-secondary" type="button">Back</button>
+          </div>
+
+          <input type="hidden" id="auto-data" value="">
+        </div>
+
+        <!-- MANUAL PANEL -> the same form you already had -->
+        <div id="manual-panel" class="hidden">
+          <form id="show-form">
+            <input type="hidden" id="show-id">
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input type="text" id="title" required>
+            </div>
+            <div class="form-group">
+              <label for="original-title">Original Title (optional)</label>
+              <input type="text" id="original-title">
+            </div>
+            <div class="form-group">
+              <label for="type">Type</label>
+              <select id="type" required>
+                <option value="tv">TV Show</option>
+                <option value="web">WEB SERIES</option>
+                <option value="movie">Movie</option>
+                <option value="anime">Anime</option>
+              </select>
+            </div>
+
+            <!-- Poster field inside form -->
+            <div class="form-group">
+              <label>Poster</label>
+              <div class="poster-preview" id="poster-preview"></div>
+
+              <!-- Visible-but-offscreen file input that mobile will honour -->
+              <input type="file" id="poster-file" accept="image/*" capture="environment" class="visually-hidden">
+
+              <button type="button" class="btn-secondary" id="poster-select-btn">Select Poster</button>
+              <button type="button" class="btn-secondary hidden" id="poster-remove-btn">Remove Poster</button>
+
+              <!-- fallback URL field -->
+              <div class="mt-16">
+                <label for="poster-url">Or paste poster URL</label>
+                <input type="url" id="poster-url" placeholder="https://example.com/poster.jpg">
+                <button type="button" class="btn-secondary mt-16" id="poster-use-url">Use URL</button>
+              </div>
+            </div>
+
+            <!-- FEATURE: Multi-season episode editor -->
+            <div class="form-group" id="season-count-group">
+              <label for="season-count">Total Seasons</label>
+              <input type="number" id="season-count" min="1" value="1">
+            </div>
+
+            <div class="form-group hidden" id="season-episodes-group">
+              <label>Episodes per Season</label>
+              <div id="season-episodes-container">
+                <!-- Season episode inputs will be generated here -->
+              </div>
+            </div>
+            <div class="form-group" id="episode-count-group">
+              <label for="episode-count">Episodes per Season (if same)</label>
+              <input type="number" id="episode-count" min="1" value="1">
+            </div>
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status">
+                <option value="planned">Planned</option>
+                <option value="watching">Watching</option>
+                <option value="paused">Paused</option>
+                <option value="finished">Finished</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="tags">Tags (comma separated)</label>
+              <input type="text" id="tags">
+            </div>
+            <div class="form-group">
+              <label for="notes">Notes</label>
+              <textarea id="notes" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="runtime">Runtime / Info</label>
+                <input type="text" id="runtime" placeholder="e.g. 45 min / 24m runtime_seconds">
+              </div>
+
+
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea id="description" rows="4" placeholder="Long description or overview"></textarea>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancel-form">Cancel</button>
+        <button class="btn-primary" id="save-show">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURE: Confirm delete modal -->
+  <div class="modal-backdrop hidden" id="confirm-modal">
+    <div class="modal confirm-modal">
+      <h3 id="confirm-title">Confirm Delete</h3>
+      <p id="confirm-message">Are you sure you want to delete this show?</p>
+      <div class="confirm-buttons">
+        <button class="btn-secondary" id="confirm-cancel">Cancel</button>
+        <button class="btn-primary" id="confirm-ok">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Drawer -->
+ <!-- Settings Drawer -->
+<div id="settings-drawer" class="settings-drawer">
+  <div class="settings-header">
+    <h2>Menu</h2>
+    <button class="btn" id="close-settings">✕</button>
+  </div>
+
+  <div style="margin-bottom:12px; border-bottom:1px solid rgba(0,0,0,0.04); padding-bottom:12px;">
+    <div style="font-weight:900; margin-bottom:8px;">Account</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <button class="btn" id="open-settings-page">⚙️ Open Settings page</button>
+      <button class="btn" id="open-dashboard-btn">📊 Dashboard</button>
+        <button class="btn" id="open-recommend-btn">🎲 AI Recommendation</button>
+      <button class="btn" id="logout-btn">🔓 Logout</button>
+    </div>
+  </div>
+
+  <div class="settings-option">
+    <label for="sort-by-setting">Default Sort</label>
+    <select id="sort-by-setting">
+      <option value="recent">Recently Updated</option>
+      <option value="alpha">Alphabetical</option>
+      <option value="progress">Progress</option>
+    </select>
+  </div>
+
+  <div class="settings-option">
+    <p>APP Version: <span id="schema-version">2.5.0</span></p>
+  </div>
+</div>
+  </div>
+  </div>
+
+
+  <!-- Toast Notification -->
+  <div class="toast hidden" id="toast">
+    <div class="toast-message" id="toast-message"></div>
+    <button class="toast-action" id="toast-action">Undo</button>
+  </div>
+
+  <!-- FEATURE: Context menu -->
+  <div class="context-menu hidden" id="context-menu">
+    <div class="context-menu-item" data-action="mark-before">Mark all before this episode</div>
+    <div class="context-menu-item" data-action="edit-episode">Edit episode</div>
+    <div class="context-menu-item" data-action="copy-info">Copy episode info</div>
+  </div>
+
+  <script>
+    /* Full app script - safe, non-destructive, preserves all IDs/features */
+
+
+
+    (function () {
+      function setHeaderTabsOffset() {
+        const header = document.querySelector('.app-header');
+        const tabs = document.querySelector('.tabs');
+        const content = document.querySelector('.content');
+        if (!header || !tabs || !content) return;
+
+        // compute bounding heights including margins
+        const headerRect = header.getBoundingClientRect();
+        const headerStyle = getComputedStyle(header);
+        const headerMarginBottom = parseFloat(headerStyle.marginBottom) || 0;
+
+        // place header at page top spacing (already fixed at top:16px)
+        header.style.top = '16px';
+
+        // compute tabs top: header top + header height + 12px gap
+        const gap = 12;
+        const tabsTop = 16 + headerRect.height + gap; // 16 matches header top offset
+        tabs.style.top = tabsTop + 'px';
+
+        // set CSS variable for content padding to avoid overlap
+        const totalOffset = tabsTop + tabs.getBoundingClientRect().height + 16; // extra bottom spacing
+        document.documentElement.style.setProperty('--header-tabs-offset', totalOffset + 'px');
+
+        // ensure fixed elements full width respects body padding on very small screens
+        const left = Math.max(8, parseFloat(getComputedStyle(document.body).paddingLeft) || 16);
+        const right = left;
+        header.style.left = left + 'px'; header.style.right = right + 'px';
+        tabs.style.left = left + 'px'; tabs.style.right = right + 'px';
+      }
+
+      window.addEventListener('DOMContentLoaded', setHeaderTabsOffset);
+      window.addEventListener('load', setHeaderTabsOffset);
+      window.addEventListener('resize', setHeaderTabsOffset);
+      // in case dynamic UI changes header size later
+      new MutationObserver(setHeaderTabsOffset).observe(document.querySelector('.app-header'), { childList: true, subtree: true, attributes: true });
+    })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // App state
+    let state = {
+      shows: [],
+      settings: { theme: 'system', sortBy: 'recent', lastAction: null },
+      currentTab: 'watching',
+      currentShow: null,
+      lastAction: null,
+      contextEpisode: null,
+      showToDelete: null
+    };
+    state.searchQuery = '';
+
+
+
+    // Utility: safe selector that returns a single element or null.
+    // If multiple elements have same id, prefer the last one (floating FAB usually last).
+    function $safe(selector) {
+      if (!selector) return null;
+      const nodes = document.querySelectorAll(selector);
+      if (!nodes || nodes.length === 0) return null;
+      return nodes[nodes.length - 1];
+    }
+
+    // Utility: get all nodes (may be empty NodeList)
+    function $all(selector) {
+      return document.querySelectorAll(selector || '');
+    }
+
+    // Utility: addEvent with guard
+    function on(el, evt, fn) {
+      if (!el) return;
+      try { el.addEventListener(evt, fn); } catch (e) { console.warn('evt attach failed', evt, e); }
+    }
+
+    // Utility: simple escapeHtml
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Toast helpers
+    function showToast(msg, withUndo) {
+      const toast = $safe('#toast');
+      const message = $safe('#toast-message');
+      const action = $safe('#toast-action');
+      if (!toast || !message) return;
+      message.textContent = msg || '';
+      if (withUndo && action) action.classList.remove('hidden'); else if (action) action.classList.add('hidden');
+      toast.classList.remove('hidden');
+      // auto-hide after 4s
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => { toast.classList.add('hidden'); }, 4000);
+    }
+    function hideToast() {
+      const toast = $safe('#toast');
+      if (toast) toast.classList.add('hidden');
+    }
+
+    // Elements map (use safe selectors)
+    const elements = {
+      showList: $safe('#show-list'),
+      emptyState: $safe('#empty-state'),
+      showDetail: $safe('#show-detail'),
+      resumeFab: $safe('#resume-fab'),
+      // duplicate IDs -> get last occurrence to prefer floating control
+      addShowFab: $safe('#add-show-fab'),
+      settingsFab: $safe('#settings-fab'),
+      addEditModal: $safe('#add-edit-modal'),
+      settingsDrawer: $safe('#settings-drawer'),
+      toast: $safe('#toast'),
+      toastMessage: $safe('#toast-message'),
+      toastAction: $safe('#toast-action'),
+      showForm: $safe('#show-form'),
+      modalTitle: $safe('#modal-title'),
+      themeSelect: $safe('#theme-select'),
+      importFile: $safe('#import-file'),
+      seasonCountGroup: $safe('#season-count-group'),
+      episodeCountGroup: $safe('#episode-count-group'),
+      seasonEpisodesGroup: $safe('#season-episodes-group'),
+      seasonEpisodesContainer: $safe('#season-episodes-container'),
+      sortControl: $safe('#sort-control'),
+      sortBy: $safe('#sort-by'),
+      sortBySetting: $safe('#sort-by-setting'),
+      posterFile: $safe('#poster-file'),
+      posterPreview: $safe('#poster-preview'),
+      posterSelectBtn: $safe('#poster-select-btn'),
+      posterRemoveBtn: $safe('#poster-remove-btn'),
+      posterUrlInput: $safe('#poster-url'),
+      posterUseUrlBtn: $safe('#poster-use-url'),
+      confirmModal: $safe('#confirm-modal'),
+      confirmTitle: $safe('#confirm-title'),
+      confirmMessage: $safe('#confirm-message'),
+      confirmCancel: $safe('#confirm-cancel'),
+      confirmOk: $safe('#confirm-ok'),
+      exportFallback: $safe('#export-fallback'),
+      exportJson: $safe('#export-json'),
+      copyJson: $safe('#copy-json'),
+      importFallback: $safe('#import-fallback'),
+      importJson: $safe('#import-json'),
+      importFromText: $safe('#import-from-text'),
+      seasonEditorsContainer: $safe('#season-editors-container'),
+      contextMenu: $safe('#context-menu')
+    };
+
+    // PWA placeholder
+    function setupPWA() {
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // optional: show install UI
+      });
+      window.addEventListener('appinstalled', () => { deferredPrompt = null; });
+    }
+
+    // Persistence
+    function saveData() {
+      try {
+        const dataToSave = {
+          meta: {
+            appVersion: '1.0.0',
+            schemaVersion: 3,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          settings: { ...state.settings, lastAction: state.lastAction },
+          shows: state.shows
+        };
+        localStorage.setItem('watcher:data:v3', JSON.stringify(dataToSave));
+      } catch (e) {
+        console.error('saveData failed', e);
+      }
+    }
+    function loadData() {
+      try {
+        const saved = localStorage.getItem('watcher:data:v3');
+        if (!saved) return;
+        const parsed = JSON.parse(saved);
+        state.shows = parsed.shows || [];
+        state.settings = parsed.settings || state.settings;
+        if (parsed.settings && parsed.settings.lastAction) state.lastAction = parsed.settings.lastAction;
+        // Apply theme safely
+        if (typeof setTheme === 'function') setTheme(state.settings.theme);
+        if (elements.themeSelect) elements.themeSelect.value = state.settings.theme;
+        if (elements.sortBy) elements.sortBy.value = state.settings.sortBy;
+        if (elements.sortBySetting) elements.sortBySetting.value = state.settings.sortBy;
+        if (state.shows && state.shows.length > 0 && elements.sortControl) elements.sortControl.classList.remove('hidden');
+      } catch (e) {
+        console.error('Failed to parse saved data', e);
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+function updateShowsCardVisibility() {
+  const card = document.getElementById('my-shows-card');
+card?.addEventListener('pointerenter', () => document.body.style.overflow = 'hidden');
+card?.addEventListener('pointerleave', () => document.body.style.overflow = '');
+
+  const fab = document.getElementById('resume-fab'); // fab inside card
+  const shows = (state && Array.isArray(state.shows)) ? state.shows : [];
+
+  if (!card) return;
+  if (shows.length === 0) {
+    card.style.display = 'none';
+    if (fab) fab.style.display = 'none';
+  } else {
+    card.style.display = '';
+    if (fab) fab.style.display = '';
+  }
+}
+
+// call after initial data load
+updateShowsCardVisibility();
+
+// also call after re-renders or any change to shows array
+// example: place this at the end of renderShowList()
+(function wrapRenderShowList() {
+  const orig = window.renderShowList;
+  if (typeof orig === 'function') {
+    window.renderShowList = function wrappedRenderShowList(...args) {
+      const res = orig.apply(this, args);
+      updateShowsCardVisibility();
+      return res;
+    };
+  }
+})();
+
+
+
+
+
+
+
+
+
+
+
+    // Dashboard logic
+    function computeDashboardStats() {
+      const shows = Array.isArray(state.shows) ? state.shows : [];
+      const totals = { tv: 0, movie: 0, anime: 0, web: 0, other: 0, shows: shows.length, episodesTotal: 0, episodesWatched: 0 };
+      shows.forEach(s => {
+        const t = (s.type || '').toLowerCase();
+        if (t.includes('tv')) totals.tv++;
+        else if (t.includes('movie')) totals.movie++;
+        else if (t.includes('anime')) totals.anime++;
+        else if (t.includes('web')) totals.web++;
+        else totals.other++;
+
+        if (Array.isArray(s.seasons)) {
+          s.seasons.forEach(se => {
+            if (!Array.isArray(se.episodes)) return;
+            totals.episodesTotal += se.episodes.length;
+            totals.episodesWatched += se.episodes.filter(e => e.watched).length;
+          });
+        }
+      });
+      totals.episodesUnwatched = Math.max(0, totals.episodesTotal - totals.episodesWatched);
+      // breakdown by status
+      totals.status = shows.reduce((acc, s) => {
+        acc[s.status] = (acc[s.status] || 0) + 1; return acc;
+      }, {});
+      return totals;
+    }
+
+    function renderDashboard() {
+      const el = document.getElementById('dashboard-content');
+      if (!el) return;
+      el.innerHTML = '';
+      const stats = computeDashboardStats();
+
+      // top KPIs
+      const kpis = [
+        { title: 'Total Shows', val: stats.shows, sub: `TV ${stats.tv} • Movies ${stats.movie} • Anime ${stats.anime}` },
+        { title: 'Total Episodes', val: stats.episodesTotal, sub: `Watched ${stats.episodesWatched} • Unwatched ${stats.episodesUnwatched}` },
+        { title: 'Watching Now', val: stats.status['watching'] || 0, sub: 'Shows in Watching' },
+        { title: 'Planned', val: stats.status['planned'] || 0, sub: 'Planned to watch' }
+      ];
+
+      kpis.forEach(k => {
+        const card = document.createElement('div'); card.className = 'dashboard-card';
+        card.innerHTML = `<h3>${escapeHtml(k.title)}</h3><div class="dashboard-value">${escapeHtml(String(k.val))}</div><div class="dashboard-sub">${escapeHtml(k.sub)}</div>`;
+        el.appendChild(card);
+      });
+
+      // breakdown table
+      const tableCard = document.createElement('div'); tableCard.className = 'dashboard-card';
+      const rows = `
+    <div style="font-weight:900;margin-bottom:8px">Breakdown</div>
+    <table class="dashboard-table">
+      <tr><th>Type</th><th>Count</th></tr>
+      <tr><td>TV Shows</td><td>${stats.tv}</td></tr>
+      <tr><td>Movies</td><td>${stats.movie}</td></tr>
+      <tr><td>Anime</td><td>${stats.anime}</td></tr>
+      <tr><td>Web Series</td><td>${stats.web}</td></tr>
+      <tr><td>Other</td><td>${stats.other}</td></tr>
+      <tr><td style="font-weight:900">Total Episodes</td><td style="font-weight:900">${stats.episodesTotal}</td></tr>
+      <tr><td>Episodes Watched</td><td>${stats.episodesWatched}</td></tr>
+      <tr><td>Episodes Unwatched</td><td>${stats.episodesUnwatched}</td></tr>
+    </table>
+  `;
+      tableCard.innerHTML = rows;
+      el.appendChild(tableCard);
+
+      // recent activity small card
+      const recentCard = document.createElement('div'); recentCard.className = 'dashboard-card';
+      const recent = getRecentActivity(10);
+      recentCard.innerHTML = `<h3>Recent Activity</h3><div style="font-weight:700">${recent.length ? recent.join('<br>') : 'No recent activity'}</div>`;
+      el.appendChild(recentCard);
+    }
+
+    function getRecentActivity(limit) {
+      const activities = [];
+      state.shows.forEach(s => {
+        if (!Array.isArray(s.seasons)) return;
+        s.seasons.forEach(se => {
+          se.episodes && se.episodes.forEach(ep => {
+            if (ep.watchedAt) activities.push(`${s.title} S${se.seasonNumber || '?'}E${ep.episodeNumber || '?'} — ${new Date(ep.watchedAt).toLocaleString()}`);
+          });
+        });
+      });
+      activities.sort((a, b) => (new Date(b.split(' — ').pop()) - new Date(a.split(' — ').pop())));
+      return activities.slice(0, limit);
+    }
+
+    // UI wiring
+    (function dashboardWiring() {
+      const openBtn = $safe('#open-dashboard-btn');
+      const closeBtn = $safe('#close-dashboard');
+      const page = $safe('#dashboard-page');
+      const refresh = $safe('#dashboard-refresh');
+      const exportBtn = $safe('#dashboard-export');
+
+      if (openBtn && page) on(openBtn, 'click', () => {
+        page.classList.remove('hidden');
+        renderDashboard();
+        // close settings drawer if open
+        const sd = $safe('#settings-drawer'); if (sd) sd.classList.remove('open');
+      });
+      if (closeBtn && page) on(closeBtn, 'click', () => page.classList.add('hidden'));
+      if (refresh && page) on(refresh, 'click', () => renderDashboard());
+      if (exportBtn && page) on(exportBtn, 'click', () => {
+        const snap = computeDashboardStats();
+        const blob = new Blob([JSON.stringify(snap, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'dashboard-snapshot.json'; a.click();
+        showToast('Dashboard exported', false);
+      });
+
+      // ensure it updates after data changes
+      const origSave = window.saveData;
+      window.saveData = function () { origSave && origSave(); if (!document.getElementById('dashboard-page')) return; if (!document.getElementById('dashboard-page').classList.contains('hidden')) renderDashboard(); };
+    })();
+
+
+
+
+
+
+    // Export / Import
+    function exportData() {
+      if (typeof File === 'undefined' || typeof URL === 'undefined' || typeof URL.createObjectURL === 'undefined') {
+        if (elements.exportJson && elements.exportFallback) {
+          elements.exportJson.value = JSON.stringify({ settings: state.settings, shows: state.shows }, null, 2);
+          elements.exportFallback.classList.remove('hidden');
+        }
+        return;
+      }
+      const dataStr = JSON.stringify({ settings: state.settings, shows: state.shows }, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `pop-watch-data-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      showToast('Data exported', false);
+    }
+    function copyJsonToClipboard() {
+      if (!elements.exportJson) return;
+      elements.exportJson.select();
+      document.execCommand('copy');
+      showToast('JSON copied to clipboard', false);
+    }
+    function importFromText() {
+      if (!elements.importJson) return;
+      try {
+        const importedData = JSON.parse(elements.importJson.value);
+        handleImportedData(importedData);
+      } catch (e) {
+        console.error('Error parsing JSON', e);
+        showToast('Error parsing JSON', false);
+      }
+    }
+    function importData(event) {
+      const file = event && event.target && event.target.files ? event.target.files[0] : null;
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          handleImportedData(imported);
+          showToast('Data imported', false);
+        } catch (err) {
+          console.error('Error importing', err);
+          showToast('Error importing data', false);
+        }
+      };
+      reader.readAsText(file);
+      // reset
+      if (event && event.target) event.target.value = '';
+    }
+    function handleImportedData(importedData) {
+      if (!importedData || !Array.isArray(importedData.shows)) {
+        showToast('Invalid import format', false);
+        return;
+      }
+      const merge = confirm('Import and merge data? OK to merge, Cancel to replace');
+      if (!merge) {
+        if (!confirm('This will replace your current shows. Continue?')) return;
+        state.shows = importedData.shows;
+        if (importedData.settings) state.settings = importedData.settings;
+      } else {
+        // merge by id
+        const map = new Map(state.shows.map(s => [s.id, s]));
+        importedData.shows.forEach(s => {
+          if (!map.has(s.id)) map.set(s.id, s); else {
+            // simple merge: prefer imported entries for conflicts
+            map.set(s.id, { ...map.get(s.id), ...s });
+          }
+        });
+        state.shows = Array.from(map.values());
+      }
+      saveData();
+      render();
+    }
+
+    // Undo
+    function undoLastAction() {
+      if (!state.lastAction) { showToast('Nothing to undo', false); return; }
+      const a = state.lastAction;
+      switch (a.type) {
+        case 'toggleEpisode':
+          // restore previous state
+          const showIdx = state.shows.findIndex(s => s.id === a.showId);
+          if (showIdx === -1) break;
+          const season = state.shows[showIdx].seasons.find(s => s.seasonNumber === a.seasonNumber);
+          if (!season) break;
+          const ep = season.episodes.find(e => e.episodeNumber === a.episodeNumber);
+          if (!ep) break;
+          ep.watched = a.previousState.watched;
+          ep.watchedAt = a.previousState.watchedAt;
+          saveData(); renderShowDetail(); renderShowList();
+          showToast('Undo completed', false);
+          break;
+        case 'deleteShow':
+          if (a.snapshot) state.shows.push(a.snapshot);
+          saveData(); renderShowList(); showToast('Undo completed', false);
+          break;
+        case 'seasonComplete':
+        case 'bulkMark':
+          if (a.snapshot) restoreShowFromSnapshot(a.snapshot);
+          showToast('Undo completed', false);
+          break;
+        default:
+          showToast('Cannot undo action', false);
+      }
+      state.lastAction = null;
+      saveData();
+    }
+
+    // Snapshot helpers
+    function createShowSnapshot(show) { return JSON.parse(JSON.stringify(show)); }
+    function restoreShowFromSnapshot(snapshot) {
+      if (!snapshot) return;
+      const idx = state.shows.findIndex(s => s.id === snapshot.id);
+      if (idx !== -1) state.shows[idx] = snapshot;
+      else state.shows.push(snapshot);
+      saveData(); render(); if (state.currentShow && state.currentShow.id === snapshot.id) { state.currentShow = snapshot; renderShowDetail(); }
+    }
+
+    // Theme
+    function setTheme(theme) {
+      if (!theme) return;
+      const root = document.documentElement;
+      if (theme === 'system') {
+        root.removeAttribute('data-theme');
+      } else {
+        root.setAttribute('data-theme', theme);
+      }
+      state.settings.theme = theme;
+      saveData();
+    }
+    function applyTheme() {
+      setTheme(state.settings.theme || 'system');
+    }
+
+    // Render list and detail
+    function calculateProgress(show) {
+      if (!show || !show.seasons) return 0;
+      const total = show.seasons.reduce((t, s) => t + (s.episodes ? s.episodes.length : 0), 0);
+      const watched = show.seasons.reduce((t, s) => t + (s.episodes ? s.episodes.filter(e => e.watched).length : 0), 0);
+      return total > 0 ? (watched / total) * 100 : 0;
+    }
+    function getNextUnwatchedEpisode(show) {
+      if (!show || !show.seasons) return null;
+      for (const season of show.seasons) {
+        for (const episode of season.episodes) {
+          if (!episode.watched) return { seasonNumber: season.seasonNumber, episodeNumber: episode.episodeNumber, episode };
+        }
+      }
+      return null;
+    }
+    function renderShowList() {
+      if (!elements.showList) return;
+      elements.showList.innerHTML = '';
+      const empty = elements.emptyState;
+      let filtered = (state.currentTab === 'all') ? state.shows : state.shows.filter(s => s.status === state.currentTab || (state.currentTab === 'watching' && s.status === 'watching'));
+      // apply search filter
+      const q = (state.searchQuery || '').trim().toLowerCase();
+      if (q) {
+        filtered = filtered.filter(s => {
+          const inTitle = (s.title || '').toLowerCase().includes(q);
+          const inOriginal = (s.originalTitle || s.original_title || '').toLowerCase().includes(q);
+          const inTags = Array.isArray(s.tags) ? s.tags.join(' ').toLowerCase().includes(q) : (s.tags || '').toLowerCase().includes(q);
+          return inTitle || inOriginal || inTags;
+        });
+      }
+
+      // Sort
+      const sortBy = state.settings.sortBy || 'recent';
+      filtered.sort((a, b) => {
+        if (sortBy === 'recent') return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+        if (sortBy === 'alpha') return (a.title || '').localeCompare(b.title || '');
+        if (sortBy === 'progress') return calculateProgress(b) - calculateProgress(a);
+        return 0;
+      });
+      if (filtered.length === 0) {
+        if (empty) empty.classList.remove('hidden');
+        return;
+      } else if (empty) empty.classList.add('hidden');
+
+      filtered.forEach(show => {
+        const card = document.createElement('div');
+        card.className = 'show-card';
+        card.tabIndex = 0;
+        // poster background
+        if (show.posterDataUrl || show.posterUrl) {
+          const bg = document.createElement('div');
+          bg.className = 'show-card-poster';
+          bg.style.backgroundImage = `url(${show.posterDataUrl || show.posterUrl})`;
+          card.appendChild(bg);
+        }
+        const content = document.createElement('div');
+        content.className = 'show-card-content';
+        const total = show.seasons.reduce((t, s) => t + (s.episodes ? s.episodes.length : 0), 0);
+        const watched = show.seasons.reduce((t, s) => t + (s.episodes ? s.episodes.filter(e => e.watched).length : 0), 0);
+        const progress = total > 0 ? (watched / total) * 100 : 0;
+        const next = getNextUnwatchedEpisode(show);
+        const nextText = next ? (show.type === 'movie' ? 'Movie' : `S${next.seasonNumber}E${next.episodeNumber}`) : '—';
+        content.innerHTML = `
+      <div class="show-card-header">
+        <h3 class="show-title">${escapeHtml(show.title)}</h3>
+        <span class="show-type">${escapeHtml(show.type || '')}</span>
+      </div>
+      <div class="show-progress">
+        <div class="progress-bar"><div class="progress-fill" style="width: ${progress}%"></div></div>
+        <div class="progress-text">${watched}/${total} episodes</div>
+      </div>
+      <div class="show-subtitle">Next: ${escapeHtml(nextText)}</div>
+    `;
+        card.appendChild(content);
+        on(card, 'click', () => openShowDetail(show));
+        elements.showList.appendChild(card);
+      });
+    }
+
+    // ----------------------- Detail render helpers -----------------------
+function renderShowDetail() {
+  if (!state.currentShow || !elements.showDetail) return;
+  openShowDetail(state.currentShow);
+}
+
+// Open/close detail
+function openShowDetail(show) {
+  if (!show || !elements.showDetail) return;
+  state.currentShow = show;
+
+  // save list scroll so closing returns to same spot
+  state._lastListScroll = window.scrollY || document.documentElement.scrollTop || 0;
+  state.currentShow = show;
+
+  // hide list, show detail
+  elements.showList.classList.add('hidden');
+  elements.showDetail.classList.remove('hidden');
+
+
+  if (elements.showList) elements.showList.classList.add('hidden');
+  if (elements.emptyState) elements.emptyState.classList.add('hidden');
+  if (elements.showDetail) elements.showDetail.classList.remove('hidden');
+  if (elements.resumeFab) elements.resumeFab.classList.remove('hidden');
+
+  const seasons = Array.isArray(show.seasons) ? show.seasons : [];
+  const total = seasons.reduce((t, s) => t + ((s.episodes || []).length), 0);
+  const watched = seasons.reduce((t, s) => t + ((s.episodes || []).filter(e => e.watched).length), 0);
+  const progress = total > 0 ? Math.round((watched / total) * 100) : 0;
+  const seasonsTotal = seasons.length;
+  const posterUrl = show.posterDataUrl || show.posterUrl || '';
+
+  // Build detail HTML: header with poster, then two-column area: details | episodes
+  let html = `
+  <div class="detail-layout">
+  <div class="detail-header-card">
+
+    <!-- Actions row -->
+    <div class="detail-actions">
+      <button class="btn" id="edit-show">Edit</button>
+      <button class="btn" id="back-button">Back</button>
+    </div>
+
+    <!-- Poster full preview -->
+    <div class="detail-header-card-inner">
+      <img class="detail-poster-img" src="${escapeHtml(posterUrl)}" alt="${escapeHtml(show.title)} poster">
+
+      <div class="detail-meta">
+        <div class="detail-title-row">
+          <div style="min-width:0">
+            <div class="detail-title">${escapeHtml(show.title || 'Untitled')}</div>
+            <div class="detail-submeta" style="margin-top:6px">
+              ${escapeHtml(show.originalTitle || '')}
+              ${show.type ? ` · <strong>${escapeHtml(show.type)}</strong>` : ''}
+              ${show.status ? ` · ${escapeHtml(show.status)}` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+        <div style="margin-top:12px">
+          <div style="font-weight:700">Progress</div>
+          <div class="show-progress" style="margin-top:6px">
+            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+            <div class="progress-text" style="margin-top:6px">${watched}/${total} episodes watched · ${progress}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-main">
+      <div class="detail-info">
+        <div class="row"><strong>About</strong></div>
+        <div style="margin-bottom:12px">
+  ${escapeHtml(
+      show.overview || show.notes || show.description ||
+      (show.raw_auto && (show.raw_auto.overview || show.raw_auto.description)) ||
+      'No description available'
+  )}
+</div>
+
+
+        <div class="row"><strong>Stats</strong></div>
+        <div style="margin-bottom:8px">Seasons: <strong>${seasonsTotal}</strong></div>
+        <div style="margin-bottom:8px">Episodes: <strong>${total}</strong></div>
+        <div style="margin-bottom:8px">Watched: <strong>${watched}</strong></div>
+
+        <div class="row" style="margin-top:12px"><strong>Tags</strong></div>
+<div style="margin-bottom:12px">
+  ${ Array.isArray(show.tags) && show.tags.length
+      ? escapeHtml(show.tags.join(', '))
+      : (typeof show.tags === 'string' && show.tags.trim()
+          ? escapeHtml(show.tags)
+          : '—') }
+</div>
+
+<div class="row" style="margin-top:12px"><strong>Runtime / Info</strong></div>
+<div>
+   ${ show.runtime
+      ? formatRuntime(show.runtime)
+      : (show.seasons && show.seasons[0] && show.seasons[0].episodes &&
+         show.seasons[0].episodes[0] && show.seasons[0].episodes[0].runtime_minutes)
+        ? formatRuntime(show.seasons[0].episodes[0].runtime_minutes)
+        : '—' }
+</div>
+
+
+
+        <div class="row"><strong>Added</strong></div>
+        <div style="margin-bottom:12px">${show.createdAt ? new Date(show.createdAt).toLocaleDateString() : '—'}</div>
+
+        
+
+      <div class="detail-episodes">
+  `;
+
+  // Seasons and episodes (preserve existing per-season layout + episode chips)
+  seasons.forEach(season => {
+    const seasonTotal = (season.episodes || []).length;
+    const seasonWatched = (season.episodes || []).filter(e => e.watched).length;
+    html += `
+      <div class="season-accordion">
+        <div class="season-header" data-season="${season.seasonNumber}">
+          <div class="season-title">Season ${season.seasonNumber}</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="season-progress">${seasonWatched}/${seasonTotal}</span>
+            <button class="season-complete-btn btn" data-season="${season.seasonNumber}">Mark Complete</button>
+          </div>
+        </div>
+        <div class="episodes-grid">`;
+    (season.episodes || []).forEach(ep => {
+      html += `<div class="episode-chip ${ep.watched ? 'watched' : ''}" data-season="${season.seasonNumber}" data-episode="${ep.episodeNumber}" title="${escapeHtml(ep.title || '')}">${escapeHtml(String(ep.episodeNumber))}</div>`;
+    });
+    html += `</div>  </div>`;
+  });
+
+  html += `</div>
+  
+  <div class="detail-actions">
+  <button class="btn delete" id="delete-show">Delete</button> </div>
+  
+  
+  </div></div>`; // close episodes, main, layout
+
+
+  elements.showDetail.innerHTML = html;
+
+  // Attach listeners (reuse existing helpers)
+  on($safe('#back-button'), 'click', () => closeShowDetail());
+  on($safe('#edit-show'), 'click', () => openAddEditModal(show));
+  on($safe('#delete-show'), 'click', () => confirmDeleteShow(show));
+
+  $all('.season-complete-btn').forEach(btn =>
+    on(btn, 'click', e => { e.stopPropagation(); const n = parseInt(btn.dataset.season); if (!Number.isNaN(n)) markSeasonComplete(n); })
+  );
+
+  $all('.episode-chip').forEach(chip =>
+    on(chip, 'click', e => {
+      const s = parseInt(chip.dataset.season);
+      const ep = parseInt(chip.dataset.episode);
+      if (!Number.isNaN(s) && !Number.isNaN(ep)) toggleEpisodeWatched(show, s, ep);
+    })
+  );
+
+  $all('.episode-chip').forEach(chip => { chip.tabIndex = 0; chip.setAttribute('role', 'button'); });
+
+  $all('.season-header').forEach(header =>
+    on(header, 'click', e => {
+      if (e.target && e.target.classList && e.target.classList.contains('season-complete-btn')) return;
+      const grid = header.nextElementSibling;
+      if (grid) grid.classList.toggle('hidden');
+    })
+  );
+}
+
+function closeShowDetail() {
+  state.currentShow = null;
+  if (elements.showDetail) elements.showDetail.classList.add('hidden');
+  if (elements.resumeFab) elements.resumeFab.classList.add('hidden');
+  if (elements.showList) elements.showList.classList.remove('hidden');
+  // render then restore scroll position saved earlier
+  renderShowList();
+  const y = state._lastListScroll || 0;
+  // small timeout ensures DOM updated before scrolling
+  setTimeout(() => { window.scrollTo(0, y); }, 0);
+}
+
+
+
+
+
+// Convert runtime minutes into "X hr Y min" format
+function formatRuntime(value) {
+  if (!value) return '—';
+
+  let minutes = 0;
+
+  // Case: "94:00" or "7:00"
+  if (typeof value === 'string' && value.includes(':')) {
+    minutes = parseInt(value.split(':')[0], 10);
+  } else {
+    minutes = parseInt(value, 10);
+  }
+
+  if (isNaN(minutes)) return value;
+
+  if (minutes >= 60) {
+    const hrs = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hrs} hr${hrs > 1 ? 's' : ''}${mins > 0 ? ' ' + mins + ' min' : ''}`;
+  }
+  return `${minutes} min`;
+}
+
+
+
+
+
+
+
+// ----------------------- Add / Edit modal -----------------------
+function openAddEditModal(show) {
+  if (!elements.addEditModal || !elements.showForm) return;
+  elements.addEditModal.classList.remove('hidden');
+
+  const form = elements.showForm;
+
+  // reset or populate (safe)
+  if (typeof form.reset === 'function') form.reset();
+
+  if (show) {
+    if (elements.modalTitle) elements.modalTitle.textContent = 'Edit Show';
+
+    form.querySelector('#show-id').value = show.id || '';
+    form.querySelector('#title').value = show.title || '';
+    form.querySelector('#original-title').value = show.originalTitle || '';
+    form.querySelector('#type').value = show.type || 'tv';
+    form.querySelector('#status').value = show.status || 'planned';
+    form.querySelector('#tags').value = (show.tags || []).join(', ');
+    form.querySelector('#notes').value = show.notes || '';
+
+    // poster preview
+    if (show.posterDataUrl || show.posterUrl) {
+      if (elements.posterPreview) elements.posterPreview.style.backgroundImage = `url(${show.posterDataUrl || show.posterUrl})`;
+      if (elements.posterRemoveBtn) elements.posterRemoveBtn.classList.remove('hidden');
+    } else {
+      if (elements.posterPreview) elements.posterPreview.style.backgroundImage = '';
+      if (elements.posterRemoveBtn) elements.posterRemoveBtn.classList.add('hidden');
+    }
+
+    // seasons & episodes safe defaults
+    const seasons = Array.isArray(show.seasons) ? show.seasons : [{ seasonNumber: 1, episodes: [{ episodeNumber: 1 }] }];
+    const seasonCount = seasons.length;
+    const epCounts = seasons.map(s => (Array.isArray(s.episodes) ? s.episodes.length : 0));
+
+    const seasonCountEl = form.querySelector('#season-count');
+    if (seasonCountEl) seasonCountEl.value = seasonCount;
+
+    const episodeCountEl = form.querySelector('#episode-count');
+    const allSame = epCounts.length > 0 && epCounts.every(c => c === epCounts[0]);
+    if (episodeCountEl) episodeCountEl.value = allSame ? (epCounts[0] || '') : '';
+
+    // UI visibility for movies
+    const typeEl = form.querySelector('#type');
+    if (typeEl && typeEl.value === 'movie') {
+      if (elements.seasonCountGroup) elements.seasonCountGroup.classList.add('hidden');
+      if (elements.episodeCountGroup) elements.episodeCountGroup.classList.add('hidden');
+      if (elements.seasonEpisodesGroup) elements.seasonEpisodesGroup.classList.add('hidden');
+    } else {
+      if (elements.seasonCountGroup) elements.seasonCountGroup.classList.remove('hidden');
+      if (elements.episodeCountGroup) elements.episodeCountGroup.classList.remove('hidden');
+      if (typeof updateSeasonEpisodesUI === 'function') updateSeasonEpisodesUI();
+      for (let i = 1; i <= seasonCount; i++) {
+        const input = document.getElementById(`season-${i}-episodes`);
+        if (input) input.value = epCounts[i - 1] || (episodeCountEl ? episodeCountEl.value || 1 : 1);
+      }
+    }
+  } else {
+    // Add mode defaults
+    if (elements.modalTitle) elements.modalTitle.textContent = 'Add Show';
+
+    // ensure form inputs exist before assigning
+    const safeSet = (sel, v) => {
+      const el = form.querySelector(sel);
+      if (el) el.value = v;
+    };
+    safeSet('#show-id', '');
+    safeSet('#title', '');
+    safeSet('#original-title', '');
+    safeSet('#type', 'tv');
+    safeSet('#status', 'planned');
+    safeSet('#tags', '');
+    safeSet('#notes', '');
+
+    if (elements.posterPreview) elements.posterPreview.style.backgroundImage = '';
+    if (elements.posterRemoveBtn) elements.posterRemoveBtn.classList.add('hidden');
+
+    if (elements.seasonCountGroup) elements.seasonCountGroup.classList.remove('hidden');
+    if (elements.episodeCountGroup) elements.episodeCountGroup.classList.remove('hidden');
+    if (typeof updateSeasonEpisodesUI === 'function') updateSeasonEpisodesUI();
+  }
+
+  // focus first field for accessibility
+  const titleEl = form.querySelector('#title');
+  if (titleEl) setTimeout(() => titleEl.focus(), 120);
+
+  // final season UI enforcement (in case showForm differs)
+  const typeElFinal = elements.showForm.querySelector('#type');
+  if (typeElFinal && typeElFinal.value === 'movie') {
+    if (elements.seasonCountGroup) elements.seasonCountGroup.classList.add('hidden');
+    if (elements.episodeCountGroup) elements.episodeCountGroup.classList.add('hidden');
+    if (elements.seasonEpisodesGroup) elements.seasonEpisodesGroup.classList.add('hidden');
+  } else {
+    if (elements.seasonCountGroup) elements.seasonCountGroup.classList.remove('hidden');
+    if (elements.episodeCountGroup) elements.episodeCountGroup.classList.remove('hidden');
+    if (typeof updateSeasonEpisodesUI === 'function') updateSeasonEpisodesUI();
+  }
+}
+
+
+
+    function closeModal() { if (elements.addEditModal) elements.addEditModal.classList.add('hidden'); }
+
+    // Save show 
+function saveShow() {
+  if (!elements.showForm) return;
+  const form = elements.showForm;
+
+  const id = form.querySelector('#show-id').value || (`id_${Date.now()}`);
+  const title = form.querySelector('#title').value.trim();
+  if (!title) { alert('Title required'); return; }
+
+  const type = form.querySelector('#type').value;
+  const status = form.querySelector('#status').value;
+  const notes = form.querySelector('#notes').value;
+  const description = (form.querySelector('#description') && form.querySelector('#description').value) || '';
+  // read inputs (add/replace near other consts)
+const tags = form.querySelector('#tags')
+  ? (form.querySelector('#tags').value || '').split(',').map(t => t.trim()).filter(Boolean)
+  : [];
+const runtime = form.querySelector('#runtime') ? (form.querySelector('#runtime').value || '').trim() : '';
+
+
+
+  // seasons creation
+  let seasons = [];
+  const seasonCount = parseInt(form.querySelector('#season-count') ? form.querySelector('#season-count').value : 1) || 1;
+  if (type === 'movie') {
+    seasons = [{
+      seasonNumber: 1,
+      episodes: [{ episodeNumber: 1, title: title, watched: false }]
+    }];
+  } else {
+    const episodeCountSame = parseInt(form.querySelector('#episode-count') ? form.querySelector('#episode-count').value : 1) || 1;
+    for (let i = 1; i <= seasonCount; i++) {
+      const countInput = document.getElementById(`season-${i}-episodes`);
+      const count = countInput ? parseInt(countInput.value) || episodeCountSame : episodeCountSame;
+      const episodes = [];
+      for (let e = 1; e <= count; e++) {
+        episodes.push({ episodeNumber: e, title: null, watched: false });
+      }
+      seasons.push({ seasonNumber: i, episodes });
+    }
+  }
+
+  // ---- SAFE MERGE: merge auto-prefill into local vars ----
+  (function mergeAutoPrefillBeforeSaveSafe() {
+    const autoVal = (document.getElementById('auto-data') && document.getElementById('auto-data').value) || null;
+    const storedAuto = window.__AUTO_PREFILL || null;
+    let auto = null;
+    try { if (autoVal) auto = JSON.parse(autoVal); } catch (e) { auto = null; }
+    if (!auto && storedAuto) auto = storedAuto;
+    if (!auto) return;
+
+    const formTitle = form.querySelector('#title')?.value.trim() || '';
+    const formNotes = form.querySelector('#notes')?.value || '';
+    const formRuntime = form.querySelector('#runtime')?.value || '';
+    const formSeasonsJSON = form.querySelector('#seasons-data')?.value || null;
+    // read inputs (add/replace near other consts)
+const tags = form.querySelector('#tags')
+  ? (form.querySelector('#tags').value || '').split(',').map(t => t.trim()).filter(Boolean)
+  : [];
+const runtime = form.querySelector('#runtime') ? (form.querySelector('#runtime').value || '').trim() : '';
+
+
+    window._merge_title = formTitle || auto.title || '';
+    window._merge_notes = formNotes || auto.overview || auto.description || '';
+    window._merge_runtime = formRuntime || (auto.runtime || auto.runtime_minutes ? String(auto.runtime || auto.runtime_minutes) : '');
+    window._merge_poster = (auto.poster) ? auto.poster : (auto.poster_path ? `https://image.tmdb.org/t/p/w500${auto.poster_path}` : '');
+
+    if (formSeasonsJSON) {
+      try { window._merge_seasons = JSON.parse(formSeasonsJSON); } catch (e) { window._merge_seasons = null; }
+    } else if (Array.isArray(auto.seasons)) {
+      window._merge_seasons = auto.seasons.map(s => ({
+        seasonNumber: s.season_number ?? s.seasonNumber ?? 1,
+        episodes: (s.episodes || []).map(ep => ({
+          episodeNumber: ep.episode_number ?? ep.episodeNumber ?? ep.number ?? null,
+          title: ep.title ?? ep.name ?? '',
+          runtime_seconds: ep.runtime_seconds ?? (ep.runtime_minutes ? Math.round(ep.runtime_minutes * 60) : null),
+          runtime_mmss: ep.runtime_mmss ?? (ep.runtime_minutes ? `${Math.round(ep.runtime_minutes)}:00` : null),
+          watched: false
+        }))
+      }));
+    } else {
+      window._merge_seasons = null;
+    }
+
+    window._merge_raw_auto = auto.raw || auto;
+  })();
+
+  const existingIndex = state.shows.findIndex(s => s.id === id);
+  const now = new Date().toISOString();
+
+  const showObj = {
+    id,
+    title,
+    originalTitle: form.querySelector('#original-title').value || '',
+    type,
+    status,
+    tags,
+    notes,
+    runtime,
+    description,   // <-- now saved properly
+    seasons,
+    posterDataUrl: elements.posterPreview && elements.posterPreview.style && elements.posterPreview.style.backgroundImage
+      ? elements.posterPreview.style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '')
+      : null,
+    updatedAt: now,
+    createdAt: existingIndex === -1
+      ? now
+      : (state.shows[existingIndex] && state.shows[existingIndex].createdAt) || now
+  };
+
+  if (existingIndex === -1) state.shows.push(showObj);
+  else state.shows[existingIndex] = showObj;
+
+  saveData();
+  closeModal();
+  render();
+  showToast('Show saved', false);
+}
+
+
+    // Delete flow
+    function confirmDeleteShow(show) {
+      if (!elements.confirmModal) return;
+      state.showToDelete = show;
+      if (elements.confirmTitle) elements.confirmTitle.textContent = 'Confirm Delete';
+      if (elements.confirmMessage) elements.confirmMessage.textContent = `Are you sure you want to delete "${show.title}"?`;
+      elements.confirmModal.classList.remove('hidden');
+    }
+    function confirmDelete() {
+      if (!state.showToDelete) return;
+      const snapshot = createShowSnapshot(state.showToDelete);
+      state.shows = state.shows.filter(s => s.id !== state.showToDelete.id);
+      state.lastAction = { type: 'deleteShow', showId: state.showToDelete.id, snapshot };
+      saveData();
+      if (elements.confirmModal) elements.confirmModal.classList.add('hidden');
+      closeShowDetail();
+      showToast('Show deleted', true);
+      state.showToDelete = null;
+    }
+
+    // Episode toggles and season complete
+    function toggleEpisodeWatched(show, seasonNumber, episodeNumber) {
+      const showIndex = state.shows.findIndex(s => s.id === show.id);
+      if (showIndex === -1) return;
+      const seasonIndex = state.shows[showIndex].seasons.findIndex(s => s.seasonNumber === seasonNumber);
+      if (seasonIndex === -1) return;
+      const episodeIndex = state.shows[showIndex].seasons[seasonIndex].episodes.findIndex(ep => ep.episodeNumber === episodeNumber);
+      if (episodeIndex === -1) return;
+      const prev = { watched: state.shows[showIndex].seasons[seasonIndex].episodes[episodeIndex].watched, watchedAt: state.shows[showIndex].seasons[seasonIndex].episodes[episodeIndex].watchedAt };
+      state.lastAction = { type: 'toggleEpisode', showId: show.id, seasonNumber, episodeNumber, previousState: prev };
+      const ep = state.shows[showIndex].seasons[seasonIndex].episodes[episodeIndex];
+      ep.watched = !ep.watched;
+      ep.watchedAt = ep.watched ? new Date().toISOString() : null;
+      updateShowStatus(showIndex);
+      saveData(); renderShowDetail(); renderShowList();
+      showToast(`Episode ${ep.watched ? 'marked as watched' : 'marked as unwatched'}`, true);
+    }
+    function updateShowStatus(showIndex) {
+      const show = state.shows[showIndex];
+      const total = show.seasons.reduce((t, s) => t + (s.episodes ? s.episodes.length : 0), 0);
+      const watched = show.seasons.reduce((t, s) => t + (s.episodes ? s.episodes.filter(e => e.watched).length : 0), 0);
+      if (watched === 0) show.status = 'planned';
+      else if (watched === total) show.status = 'finished';
+      else show.status = 'watching';
+      show.updatedAt = new Date().toISOString();
+    }
+    function markSeasonComplete(seasonNum) {
+      if (!state.currentShow) return;
+      const snapshot = createShowSnapshot(state.currentShow);
+      const season = state.currentShow.seasons.find(s => s.seasonNumber === seasonNum);
+      if (!season) return;
+      let marked = 0;
+      const now = new Date().toISOString();
+      season.episodes.forEach(ep => { if (!ep.watched) { ep.watched = true; ep.watchedAt = now; marked++; } });
+      if (marked > 0) {
+        const idx = state.shows.findIndex(s => s.id === state.currentShow.id);
+        if (idx !== -1) updateShowStatus(idx);
+        state.lastAction = { type: 'seasonComplete', showId: state.currentShow.id, snapshot };
+        saveData(); renderShowDetail(); renderShowList();
+        showToast(`Marked ${marked} episodes as watched`, true);
+      } else showToast('Season already complete', false);
+    }
+
+    // Mark episodes before target
+    function markEpisodesBefore(targetSeason, targetEpisode) {
+      if (!state.currentShow) return;
+      const snapshot = createShowSnapshot(state.currentShow);
+      let marked = 0; const now = new Date().toISOString();
+      for (const season of state.currentShow.seasons) {
+        for (const episode of season.episodes) {
+          const isBefore = season.seasonNumber < targetSeason || (season.seasonNumber === targetSeason && episode.episodeNumber <= targetEpisode);
+          if (isBefore && !episode.watched) { episode.watched = true; episode.watchedAt = now; marked++; }
+        }
+      }
+      if (marked > 0) {
+        const idx = state.shows.findIndex(s => s.id === state.currentShow.id);
+        if (idx !== -1) updateShowStatus(idx);
+        state.lastAction = { type: 'bulkMark', showId: state.currentShow.id, snapshot };
+        saveData(); renderShowDetail(); renderShowList();
+        showToast(`Marked ${marked} episodes as watched`, true);
+      } else showToast('No episodes to mark', false);
+    }
+
+    // Context menu actions
+    function copyEpisodeInfo(seasonNumber, episodeNumber) {
+      if (!state.currentShow) return;
+      const show = state.currentShow;
+      const season = show.seasons.find(s => s.seasonNumber === seasonNumber);
+      if (!season) return;
+      const episode = season.episodes.find(ep => ep.episodeNumber === episodeNumber);
+      if (!episode) return;
+      const text = `${show.title} S${seasonNumber}E${episodeNumber}${episode.title ? ' - ' + episode.title : ''}`;
+      navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(text).then(() => showToast('Episode info copied to clipboard', false)).catch(() => fallbackCopy(text)) : fallbackCopy(text);
+    }
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('Episode info copied', false);
+    }
+
+    // Context menu show
+    function showContextMenu(episodeChip, e) {
+      if (!episodeChip || !elements.contextMenu) return;
+      if (!state.currentShow) return;
+      const seasonNumber = parseInt(episodeChip.dataset.season);
+      const episodeNumber = parseInt(episodeChip.dataset.episode);
+      state.contextEpisode = { seasonNumber, episodeNumber, element: episodeChip };
+      const clientY = (e && e.clientY) || (e && e.touches && e.touches[0] && e.touches[0].clientY) || 100;
+      const clientX = (e && e.clientX) || (e && e.touches && e.touches[0] && e.touches[0].clientX) || 100;
+      elements.contextMenu.style.top = clientY + 'px';
+      elements.contextMenu.style.left = clientX + 'px';
+      elements.contextMenu.classList.remove('hidden');
+    }
+    function handleContextMenuAction(e) {
+      if (!e || !e.target) return;
+      const action = e.target.dataset.action;
+      if (!state.contextEpisode) return;
+      elements.contextMenu.classList.add('hidden');
+      const { seasonNumber, episodeNumber } = state.contextEpisode;
+      if (action === 'mark-before') markEpisodesBefore(seasonNumber, episodeNumber);
+      else if (action === 'edit-episode') { /* could open editor - placeholder */ showToast('Edit episode (not implemented)', false); }
+      else if (action === 'copy-info') copyEpisodeInfo(seasonNumber, episodeNumber);
+      state.contextEpisode = null;
+    }
+
+    // Touch & long-press handling
+    function setupTouchHandling() {
+      let pressTimer = null;
+      document.addEventListener('touchstart', (e) => {
+        const episodeChip = e.target.closest && e.target.closest('.episode-chip');
+        if (episodeChip) {
+          pressTimer = setTimeout(() => showContextMenu(episodeChip, e), 500);
+        }
+      });
+      document.addEventListener('touchend', () => clearTimeout(pressTimer));
+      document.addEventListener('touchmove', () => clearTimeout(pressTimer));
+      document.addEventListener('contextmenu', (e) => {
+        const episodeChip = e.target.closest && e.target.closest('.episode-chip');
+        if (episodeChip) { e.preventDefault(); showContextMenu(episodeChip, e); }
+      });
+    }
+
+    // Season editor UI
+    function updateSeasonEpisodesUI() {
+      const countEl = $safe('#season-count');
+      const episodeCountEl = $safe('#episode-count');
+      const seasonCount = parseInt(countEl ? countEl.value : 1) || 1;
+      const episodeCount = parseInt(episodeCountEl ? episodeCountEl.value : 1) || 1;
+      if (!elements.seasonEpisodesContainer || !elements.seasonEpisodesGroup) return;
+      elements.seasonEpisodesContainer.innerHTML = '';
+      if (seasonCount > 1) {
+        elements.seasonEpisodesGroup.classList.remove('hidden');
+        for (let i = 1; i <= seasonCount; i++) {
+          const div = document.createElement('div');
+          div.className = 'season-episode-input';
+          div.innerHTML = `<label for="season-${i}-episodes">Season ${i} Episodes:</label>
+        <input type="number" id="season-${i}-episodes" class="season-episode-count" min="1" value="${episodeCount}">`;
+          elements.seasonEpisodesContainer.appendChild(div);
+        }
+      } else elements.seasonEpisodesGroup.classList.add('hidden');
+    }
+
+    // Poster upload handlers
+    function handlePosterUpload(e) {
+      const file = e && e.target && e.target.files ? e.target.files[0] : null;
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        const dataUrl = evt.target.result;
+        if (elements.posterPreview) elements.posterPreview.style.backgroundImage = `url(${dataUrl})`;
+        if (elements.posterRemoveBtn) elements.posterRemoveBtn.classList.remove('hidden');
+        // Keep in-form preview; saving to show happens on saveShow()
+      };
+      reader.readAsDataURL(file);
+    }
+    function removePoster() {
+      if (elements.posterPreview) elements.posterPreview.style.backgroundImage = '';
+      if (elements.posterFile) elements.posterFile.value = '';
+      if (elements.posterRemoveBtn) elements.posterRemoveBtn.classList.add('hidden');
+    }
+    function usePosterUrl() {
+      const url = (elements.posterUrlInput && elements.posterUrlInput.value) || '';
+      if (!url) { alert('Enter URL'); return; }
+      if (elements.posterPreview) elements.posterPreview.style.backgroundImage = `url(${url})`;
+      if (elements.posterRemoveBtn) elements.posterRemoveBtn.classList.remove('hidden');
+    }
+
+    // Setup event listeners (safe)
+    function setupEventListeners() {
+      // Tabs
+      $all('.tab').forEach(tab => on(tab, 'click', () => {
+        $all('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        state.currentTab = tab.dataset.tab || 'watching';
+        renderShowList();
+
+        // header search
+        const headerSearchEl = document.getElementById('header-search');
+        if (headerSearchEl) {
+          headerSearchEl.addEventListener('input', (e) => {
+            state.searchQuery = (e.target.value || '').trim();
+            renderShowList();
+          });
+          headerSearchEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              headerSearchEl.value = '';
+              state.searchQuery = '';
+              renderShowList();
+              headerSearchEl.blur();
+            }
+          });
+        }
+
+        // search expand/collapse
+        const searchFab = document.getElementById('search-fab');
+        const searchWrapper = searchFab ? searchFab.parentElement : null;
+
+        if (searchFab && searchWrapper) {
+          searchFab.addEventListener('click', () => {
+            searchWrapper.classList.toggle('active');
+            const input = searchWrapper.querySelector('.header-search');
+            if (searchWrapper.classList.contains('active')) {
+              input.classList.remove('collapsed');
+              input.focus();
+            } else {
+              input.classList.add('collapsed');
+              input.value = '';
+              state.searchQuery = '';
+              renderShowList();
+            }
+          });
+        }
+
+
+
+      }));
+
+      // FABs
+      // FABs (handle duplicate IDs by attaching to all)
+      document.querySelectorAll('#add-show-fab').forEach(el => {
+        el.addEventListener('click', () => openAddEditModal());
+      });
+
+       // header profile opens settings drawer
+  (function () {
+    const profile = document.getElementById('profile-btn');
+    if (profile) profile.addEventListener('click', (e) => {
+      // openSettings is defined in your main script
+      if (typeof openSettings === 'function') openSettings();
+      else {
+        const sd = document.getElementById('settings-drawer');
+        if (sd) sd.classList.add('open');
+      }
+    });
+
+    // open full settings page
+    const openSettingsPage = document.getElementById('open-settings-page');
+    if (openSettingsPage) openSettingsPage.addEventListener('click', () => {
+      // navigate to settings.html (same tab)
+      window.location.href = 'settings.html';
+    });
+
+    // ensure dashboard button still works (defensive)
+    const openDashboardBtn = document.getElementById('open-dashboard-btn');
+    if (openDashboardBtn && !openDashboardBtn.getAttribute('data-wired')) {
+      openDashboardBtn.addEventListener('click', () => window.location.href = 'dashboard.html');
+      openDashboardBtn.setAttribute('data-wired', '1');
+    }
+  })();
+
+      if (elements.resumeFab) {
+        elements.resumeFab.addEventListener('click', () => resumeShow());
+      }
+
+      // Modal buttons
+      on($safe('#close-modal'), 'click', () => closeModal());
+      on($safe('#cancel-form'), 'click', () => closeModal());
+      on($safe('#save-show'), 'click', () => {
+        console.log('=== SAVE BUTTON CLICKED ===');
+        console.log('About to call saveShow function');
+        saveShow();
+      });
+
+      // Settings
+      on($safe('#close-settings'), 'click', () => closeSettings());
+      on(elements.themeSelect, 'change', () => { setTheme(elements.themeSelect.value); state.settings.theme = elements.themeSelect.value; saveData(); });
+      on(elements.sortBySetting, 'change', () => { state.settings.sortBy = elements.sortBySetting.value; if (elements.sortBy) elements.sortBy.value = elements.sortBySetting.value; saveData(); renderShowList(); });
+
+      on($safe('#export-data'), 'click', () => exportData());
+      on($safe('#import-data'), 'click', () => {
+        if (elements.importFallback && elements.importFallback.classList && !elements.importFallback.classList.contains('hidden')) {
+          elements.importFallback.classList.remove('hidden');
+        } else if (elements.importFile) {
+          elements.importFile.click();
+        }
+      });
+      on(elements.importFile, 'change', importData);
+      on($safe('#clear-data'), 'click', () => clearData());
+
+      // Show type/season controls inside form
+      on($safe('#type'), 'change', (e) => {
+        const v = e && e.target && e.target.value;
+        if (v === 'movie') {
+          if (elements.seasonCountGroup) elements.seasonCountGroup.classList.add('hidden');
+          if (elements.episodeCountGroup) elements.episodeCountGroup.classList.add('hidden');
+          if (elements.seasonEpisodesGroup) elements.seasonEpisodesGroup.classList.add('hidden');
+        } else {
+          if (elements.seasonCountGroup) elements.seasonCountGroup.classList.remove('hidden');
+          if (elements.episodeCountGroup) elements.episodeCountGroup.classList.remove('hidden');
+          updateSeasonEpisodesUI();
+        }
+      });
+      on($safe('#season-count'), 'change', () => updateSeasonEpisodesUI());
+      on($safe('#episode-count'), 'change', () => updateSeasonEpisodesUI());
+
+      // Toast action
+      on(elements.toastAction, 'click', () => { undoLastAction(); hideToast(); });
+
+      // Add first show
+      on($safe('#add-first-show'), 'click', () => openAddEditModal());
+
+      // Poster upload controls
+      on(elements.posterSelectBtn, 'click', () => { if (elements.posterFile) elements.posterFile.click(); });
+      on(elements.posterFile, 'change', handlePosterUpload);
+      on(elements.posterRemoveBtn, 'click', removePoster);
+      on(elements.posterUseUrlBtn, 'click', usePosterUrl);
+
+      // Confirm modal
+      on(elements.confirmCancel, 'click', () => elements.confirmModal && elements.confirmModal.classList.add('hidden'));
+      on(elements.confirmOk, 'click', confirmDelete);
+
+      // Import/export fallback
+      on(elements.copyJson, 'click', copyJsonToClipboard);
+      on(elements.importFromText, 'click', importFromText);
+
+      // Context menu
+      document.addEventListener('click', (e) => { if (elements.contextMenu && !elements.contextMenu.contains(e.target)) elements.contextMenu.classList.add('hidden'); });
+      $all('.context-menu-item').forEach(item => on(item, 'click', handleContextMenuAction));
+
+      // safe service worker registration
+      if ('serviceWorker' in navigator) {
+        const canRegister = (location.protocol === 'https:') || (location.hostname === 'localhost') || (location.hostname === '127.0.0.1');
+        if (canRegister) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW failed', err));
+          });
+        } else {
+          console.log('ServiceWorker skipped. Not a secure origin:', location.protocol, location.hostname);
+        }
+      }
+
+
+      // Touch handling
+      setupTouchHandling();
+
+      // Keyboard support
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (elements.addEditModal && !elements.addEditModal.classList.contains('hidden')) closeModal();
+          else if (elements.settingsDrawer && elements.settingsDrawer.classList.contains('open')) closeSettings();
+          else if (state.currentShow) closeShowDetail();
+          else if (elements.contextMenu && !elements.contextMenu.classList.contains('hidden')) elements.contextMenu.classList.add('hidden');
+        }
+      });
+
+      // Back handling
+      window.addEventListener('popstate', () => { if (state.currentShow) closeShowDetail(); });
+    }
+
+    // Settings open/close helpers
+    function openSettings() { if (elements.settingsDrawer) elements.settingsDrawer.classList.add('open'); }
+    function closeSettings() { if (elements.settingsDrawer) elements.settingsDrawer.classList.remove('open'); }
+
+    // Resume stub
+    function resumeShow() { if (state.currentShow) openShowDetail(state.currentShow); else showToast('No show to resume', false); }
+
+    // Clear data
+    function clearData() {
+      if (!confirm('Clear all data?')) return;
+      state.shows = []; state.lastAction = null; state.currentShow = null;
+      localStorage.removeItem('watcher:data:v3'); render(); showToast('All data cleared', false);
+    }
+
+    // Context menu action handler already defined above (handleContextMenuAction)
+
+    // Initialization
+    function render() { renderShowList(); applyTheme(); }
+    function init() {
+      loadData();
+      setupEventListeners();
+      render();
+      setupPWA();
+      // Fallback for missing File API
+      if (elements.confirmModal) elements.confirmModal.classList.add('hidden');
+      if (elements.addEditModal) elements.addEditModal.classList.add('hidden');
+      if (elements.settingsDrawer) elements.settingsDrawer.classList.remove('open');
+      if (elements.contextMenu) elements.contextMenu.classList.add('hidden');
+
+      if (typeof File === 'undefined' || typeof URL === 'undefined' || typeof URL.createObjectURL === 'undefined') {
+        if (elements.exportFallback) elements.exportFallback.classList.remove('hidden');
+        if (elements.importFallback) elements.importFallback.classList.remove('hidden');
+      }
+    }
+
+
+
+
+
+
+
+    // run early in your init code (before normalization)
+window.__AUTO_PREFILL = window.__AUTO_PREFILL || { seasons: [] };
+const auto = window.__AUTO_PREFILL;
+
+
+
+
+console.log('=== NORMALIZATION DEBUG ===');
+console.log('Auto seasons before normalization:', auto && auto.seasons);
+if (auto && auto.seasons && auto.seasons[0] && auto.seasons[0].episodes && auto.seasons[0].episodes[0]) {
+  console.log('First episode before normalization:', auto.seasons[0].episodes[0]);
+  console.log('Episode properties:', Object.keys(auto.seasons[0].episodes[0]));
+}
+
+      const seasons = (auto.seasons || []).map(s => {
+        const normalizedSeason = {
+          seasonNumber: s.season_number || s.seasonNumber,
+          episodes: (s.episodes || []).map(ep => {
+            const normalizedEp = {
+              episodeNumber: ep.episode_number || ep.episodeNumber,
+              title: ep.title || ep.name || null,
+              runtime_seconds: ep.runtime_seconds || (ep.runtime_minutes ? Math.round(ep.runtime_minutes * 60) : null),
+              runtime_mmss: ep.runtime_mmss || (ep.runtime_minutes ? formatMMSS(Math.round(ep.runtime_minutes * 60)) : null),
+              watched: false
+            };
+            console.log('Normalizing episode:', ep, '-> normalized:', normalizedEp);
+            return normalizedEp;
+          })
+        };
+        console.log('Normalized season:', normalizedSeason);
+        return normalizedSeason;
+      });
+
+
+
+
+
+    // runtime wrap header + tabs into .header-card (non-destructive)
+  (function mergeHeaderCard() {
+    const header = document.querySelector('.app-header');
+    const tabs = document.querySelector('.tabs');
+    if (!header || !tabs) return;
+    if (header.parentElement && header.parentElement.classList.contains('header-card')) return;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'header-card';
+    // insert wrapper before header and move header+tabs inside
+    header.parentElement.insertBefore(wrapper, header);
+    wrapper.appendChild(header);
+    wrapper.appendChild(tabs);
+
+    // move header-actions and keep positions correct
+    const actions = wrapper.querySelector('.header-actions');
+    if (actions) actions.style.position = 'absolute';
+
+    // recompute offsets if function exists
+    if (typeof setHeaderTabsOffset === 'function') setHeaderTabsOffset();
+
+    // small safety: ensure .content padding uses computed value
+    const computed = wrapper.getBoundingClientRect();
+    const tabsRect = tabs.getBoundingClientRect();
+    const totalOffset = computed.height + tabsRect.height + 20;
+    document.documentElement.style.setProperty('--header-tabs-offset', totalOffset + 'px');
+  })();
+
+
+
+
+
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+  const openDashboardBtn = document.getElementById("open-dashboard-btn");
+  if (openDashboardBtn) openDashboardBtn.addEventListener('click', () => window.location.href = 'dashboard.html');
+
+const hb = document.getElementById('recommend-header-btn');
+  if (hb) hb.addEventListener('click', () => window.location.href = 'recommend.html');
+
+
+
+
+(function(){
+  const card = document.getElementById('my-shows-card');
+  const sc = document.getElementById('shows-scroll');
+  if (!card || !sc) return;
+
+  // pointer / mouse support
+  card.addEventListener('pointerenter', () => document.body.style.overflow = 'hidden');
+  card.addEventListener('pointerleave', () => document.body.style.overflow = '');
+
+  // touch support for mobile (covers iOS/Android)
+  card.addEventListener('touchstart', () => document.body.style.overflow = 'hidden', {passive:true});
+  card.addEventListener('touchend',   () => document.body.style.overflow = '');
+
+  // stop wheel from bubbling to body (desktop mouse wheel)
+  sc.addEventListener('wheel', (e) => e.stopPropagation(), {passive:false});
+
+  // iOS bounce prevention when at top/bottom of the inner scroll
+  let startY = 0;
+  sc.addEventListener('touchstart', (e) => { startY = e.touches ? e.touches[0].clientY : 0; }, {passive:true});
+  sc.addEventListener('touchmove', (e) => {
+    const scrollTop = sc.scrollTop;
+    const scrollHeight = sc.scrollHeight;
+    const offsetH = sc.offsetHeight;
+    const atTop = (scrollTop === 0);
+    const atBottom = (scrollTop + offsetH >= scrollHeight - 1);
+    const currentY = e.touches ? e.touches[0].clientY : 0;
+    const pullingDown = (currentY > startY);
+    const pullingUp = (currentY < startY);
+
+    // if trying to scroll beyond content boundaries, prevent it escaping to body
+    if ((atTop && pullingDown) || (atBottom && pullingUp)) {
+      e.preventDefault();
+    }
+  }, {passive:false});
+})();
+
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Start
+    document.addEventListener('DOMContentLoaded', init);
+
+    /* ====== TMDb AUTO-FETCH FUNCTIONALITY ======
+       Set your TMDb API key here. Use your Read Access Token or API key.
+       Example: const TMDB_API_KEY = 'abcd1234';
+    */
+    const TMDB_ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMTdlMTcxOWQ1OGM0OWI4YjM1ZjIzOWE3MjRmODhiZSIsIm5iZiI6MTc1NzQyNjk0My42Miwic3ViIjoiNjhjMDM0ZmYwZTkxMmEzOGU2MDZhYTg5Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.Uqr_7OFVeL0ayyDD3I5_O_VbeaeeCYUhL5L7Lu38xdA';
+
+    /* helper: safe selector */
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+    /* DOM references for new UI */
+    const addModeChoice = $('#add-mode-choice');
+    const autoPanel = $('#auto-panel');
+    const manualPanel = $('#manual-panel');
+    const chooseAutoBtn = $('#choose-auto');
+    const chooseManualBtn = $('#choose-manual');
+    const autoQuery = $('#auto-query');
+    const autoType = $('#auto-type');
+    const autoSearchBtn = $('#auto-search-btn');
+    const autoResults = $('#auto-results');
+    const autoPreview = $('#auto-preview');
+    const autoFetchBtn = $('#auto-fetch-btn');
+    const autoBackBtn = $('#auto-back-btn');
+    const autoDataInput = $('#auto-data');
+
+    /* Temporary holder for the selected TMDb item and fetched details */
+    let _selectedTMDbItem = null;
+    let _autoPrefill = null;
+    let _autoModeActive = false;
+
+    /* Wire event handlers */
+    function wireAutoUI() {
+      if (chooseAutoBtn) chooseAutoBtn.addEventListener('click', () => {
+        addModeChoice.classList.add('hidden');
+        autoPanel.classList.remove('hidden');
+        manualPanel.classList.add('hidden');
+        _autoModeActive = false;
+        autoDataInput.value = '';
+        autoResults.innerHTML = '';
+        autoPreview.innerHTML = '';
+        autoFetchBtn.disabled = true;
+      });
+
+      if (chooseManualBtn) chooseManualBtn.addEventListener('click', () => {
+        addModeChoice.classList.add('hidden');
+        autoPanel.classList.add('hidden');
+        manualPanel.classList.remove('hidden');
+        _autoModeActive = false;
+        autoDataInput.value = '';
+      });
+
+      if (autoBackBtn) autoBackBtn.addEventListener('click', () => {
+        addModeChoice.classList.remove('hidden');
+        autoPanel.classList.add('hidden');
+        manualPanel.classList.add('hidden');
+        _selectedTMDbItem = null;
+        _autoPrefill = null;
+        autoResults.innerHTML = '';
+        autoPreview.innerHTML = '';
+        autoFetchBtn.disabled = true;
+      });
+
+      if (autoSearchBtn) autoSearchBtn.addEventListener('click', () => {
+        const q = (autoQuery.value || '').trim();
+        if (!q) return alert('Enter search text');
+        searchTMDb(q, autoType.value);
+      });
+
+      if (autoFetchBtn) autoFetchBtn.addEventListener('click', async () => {
+        if (!_selectedTMDbItem) return;
+        try {
+          autoFetchBtn.disabled = true;
+          autoFetchBtn.textContent = 'Fetching...';
+          const details = await fetchTMDbDetails(_selectedTMDbItem, autoType.value);
+          _autoPrefill = details;
+          autoDataInput.value = JSON.stringify(details);
+          renderAutoPreview(details);
+          // move into manual-panel with prefilled form
+          applyAutoToForm(details);
+          _autoModeActive = true;
+          autoFetchBtn.textContent = 'Fetched';
+          // show manual to allow user edits before save
+          autoPanel.classList.add('hidden');
+          manualPanel.classList.remove('hidden');
+        } catch (err) {
+          console.error(err);
+          alert('Failed to fetch details. See console.');
+          autoFetchBtn.disabled = false;
+          autoFetchBtn.textContent = 'Fetch details & Prefill';
+        }
+      });
+    }
+
+    /* TMDb search (multi or filtered) */
+    async function searchTMDb(query, type) {
+      autoResults.innerHTML = 'Searching...';
+      const encoded = encodeURIComponent(query);
+      // use search/multi then filter by media_type
+      const url = `https://api.themoviedb.org/3/search/multi?query=${encoded}&include_adult=false&page=1`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${TMDB_ACCESS_TOKEN}` }
+      });
+      if (!res.ok) {
+        autoResults.innerHTML = `Search failed: ${res.status}`;
+        return;
+      }
+      const data = await res.json();
+      const items = (data.results || []).filter(r => {
+        if (type === 'movie') return r.media_type === 'movie';
+        return r.media_type === 'tv' || r.media_type === 'tv' || r.media_type === 'movie' && false;
+      }).slice(0, 10);
+
+      if (items.length === 0) {
+        autoResults.innerHTML = 'No results';
+        return;
+      }
+
+      autoResults.innerHTML = '';
+      items.forEach(it => {
+        const div = document.createElement('div');
+        div.className = 'search-result';
+        const title = it.title || it.name || 'Unknown';
+        const release = it.release_date || it.first_air_date || '';
+        div.innerHTML = `<button class="btn" data-id="${it.id}" data-type="${it.media_type}"><strong>${title}</strong> ${release ? '(' + release + ')' : ''}</button>`;
+        autoResults.appendChild(div);
+        div.querySelector('button').addEventListener('click', () => {
+          // mark selected
+          autoResults.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          div.querySelector('button').classList.add('active');
+          _selectedTMDbItem = { id: it.id, media_type: it.media_type, title, raw: it };
+          autoFetchBtn.disabled = false;
+        });
+      });
+    }
+
+    /* Fetch details depending on type.
+       For movies: /movie/{id}, returns runtime in minutes -> convert to seconds.
+       For tv: /tv/{id} then for each season fetch /tv/{id}/season/{season_number}
+    */
+    async function fetchTMDbDetails(item, expectedType) {
+      if (!item || !item.id) throw new Error('missing item');
+
+      if (expectedType === 'movie' || item.media_type === 'movie') {
+        const url = `https://api.themoviedb.org/3/movie/${item.id}`;
+        const r = await fetch(url, {
+          headers: { Authorization: `Bearer ${TMDB_ACCESS_TOKEN}` }
+        });
+        if (!r.ok) throw new Error('movie details failed');
+        const movie = await r.json();
+        const runtimeMinutes = movie.runtime || 0;
+        const runtime_seconds = Math.round((runtimeMinutes || 0) * 60);
+        return {
+          type: 'movie',
+          title: movie.title || movie.original_title,
+          tmdb_id: movie.id,
+          runtime_minutes: runtimeMinutes,
+          runtime_seconds,
+          runtime_mmss: formatMMSS(runtime_seconds),
+          seasons: [{ season_number: 1, episodes: [{ episode_number: 1, title: movie.title, runtime_seconds, runtime_mmss: formatMMSS(runtime_seconds) }] }],
+          poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
+          // ADD THESE TWO:
+          overview: movie.overview || '',
+           description: movie.overview || '',
+          raw: movie
+        };
+      } else {
+        // tv
+        const tvUrl = `https://api.themoviedb.org/3/tv/${item.id}`;
+        const r = await fetch(tvUrl, {
+          headers: { Authorization: `Bearer ${TMDB_ACCESS_TOKEN}` }
+        });
+        if (!r.ok) throw new Error('tv details failed');
+        const tv = await r.json();
+        const seasonsMeta = (tv.seasons || []).filter(s => s.season_number > 0); // skip specials 0
+        const seasons = [];
+        for (const s of seasonsMeta) {
+          // fetch season detail
+          try {
+            const seasonUrl = `https://api.themoviedb.org/3/tv/${item.id}/season/${s.season_number}`;
+            const sr = await fetch(seasonUrl, {
+              headers: { Authorization: `Bearer ${TMDB_ACCESS_TOKEN}` }
+            });
+            if (!sr.ok) { seasons.push({ season_number: s.season_number, episodes: [], raw: null }); continue; }
+            const seasonDetail = await sr.json();
+            const eps = (seasonDetail.episodes || []).map(ep => {
+              // ep.runtime may be number (minutes) or undefined. Use series fallback if needed.
+              const minuteRuntime = (ep.runtime != null && Number.isFinite(ep.runtime)) ? ep.runtime : (Array.isArray(tv.episode_run_time) && tv.episode_run_time.length ? tv.episode_run_time[0] : null);
+              const runtime_seconds = minuteRuntime != null ? Math.round(minuteRuntime * 60) : null;
+              console.log(`TMDb episode ${ep.episode_number}: ep.runtime=${ep.runtime}, series_fallback=${tv.episode_run_time}, final_minutes=${minuteRuntime}, final_seconds=${runtime_seconds}`);
+              return {
+                episode_number: ep.episode_number,
+                title: ep.name || ep.title || null,
+                runtime_minutes: minuteRuntime,
+                runtime_seconds: runtime_seconds,
+                runtime_mmss: runtime_seconds !== null ? formatMMSS(runtime_seconds) : null,
+                raw: ep
+              };
+            });
+            seasons.push({ season_number: s.season_number, episodes: eps, raw: seasonDetail });
+          } catch (err) {
+            seasons.push({ season_number: s.season_number, episodes: [], raw: null });
+          }
+        }
+        return {
+          type: expectedType === 'anime' ? 'anime' : 'tv',
+          title: tv.name || tv.original_name,
+          tmdb_id: tv.id,
+          poster: tv.poster_path ? `https://image.tmdb.org/t/p/w500${tv.poster_path}` : null,
+          overview: tv.overview || '',
+          description: tv.overview || '',
+          seasons,
+          raw: tv
+        };
+      }
+    }
+
+    /* Format seconds -> mm:ss */
+    function formatMMSS(sec) {
+      if (sec === null || sec === undefined) return null;
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    /* Render a compact preview of fetched auto data */
+    function renderAutoPreview(data) {
+      if (!data) { autoPreview.innerHTML = 'No data'; return; }
+      const lines = [];
+      lines.push(`<strong>${escapeHtml(data.title || '')}</strong> — ${data.type === 'movie' ? 'Movie' : 'TV'} `);
+      if (data.poster) lines.push(`<div style="margin-top:8px;"><img src="${data.poster}" style="width:120px;height:auto;border:1px solid #ccc"></div>`);
+      if (data.type === 'movie') {
+        lines.push(`<div>Runtime: ${data.runtime_mmss || data.runtime_seconds || 'N/A'}</div>`);
+      } else if (Array.isArray(data.seasons)) {
+        lines.push(`<div>Seasons: ${data.seasons.length}</div>`);
+        data.seasons.slice(0, 5).forEach(s => {
+          const epCount = Array.isArray(s.episodes) ? s.episodes.length : 'N/A';
+          lines.push(`<div style="margin-left:10px">Season ${s.season_number} — ${epCount} episodes</div>`);
+        });
+      }
+      autoPreview.innerHTML = lines.join('');
+    }
+
+    /* Apply auto-fetched data to the manual form fields */
+    function applyAutoToForm(data) {
+      if (!data) return;
+      // show title, type, poster and set up season/episode counts
+      const form = $('#show-form');
+      if (!form) return;
+      form.querySelector('#title').value = data.title || '';
+      form.querySelector('#original-title').value = (data.raw && (data.raw.original_name || data.raw.original_title)) || '';
+      form.querySelector('#type').value = (data.type === 'movie' ? 'movie' : (data.type === 'anime' ? 'anime' : 'tv'));
+
+      // poster preview
+      if (data.poster && $('#poster-preview')) $('#poster-preview').style.backgroundImage = `url(${data.poster})`;
+      // description -> prefill manual form description if present
+      if (typeof document !== 'undefined' && document.querySelector('#description')) document.querySelector('#description').value = data.overview || data.description || '';
+
+
+              // --- add after description prefill ---
+const runtimeEl = form.querySelector('#runtime');
+if (runtimeEl) {
+  runtimeEl.value = data.runtime || data.runtime_mmss || data.runtime_minutes ||
+                    (data.seasons && data.seasons[0] && data.seasons[0].episodes &&
+                     (data.seasons[0].episodes[0].runtime_mmss || data.seasons[0].episodes[0].runtime_minutes)) || '';
+}
+
+const tagsEl = form.querySelector('#tags');
+if (tagsEl) {
+  if (Array.isArray(data.genres)) tagsEl.value = data.genres.map(g => g.name || g).join(', ');
+  else if (Array.isArray(data.tags)) tagsEl.value = data.tags.join(', ');
+  else if (data.raw && Array.isArray(data.raw.genres)) tagsEl.value = data.raw.genres.map(g => g.name || g).join(', ');
+  else if (typeof data.genres === 'string') tagsEl.value = data.genres;
+  else tagsEl.value = '';
+}
+
+
+
+      // Set season count and episode counts per-season
+      if (data.type === 'movie') {
+        // movie -> keep seasonCount hidden (saveShow will treat as movie)
+        if ($('#season-count')) $('#season-count').value = 1;
+        if ($('#episode-count')) $('#episode-count').value = 1;
+      } else {
+        const sCount = Array.isArray(data.seasons) ? data.seasons.length || 1 : 1;
+        if ($('#season-count')) $('#season-count').value = sCount;
+        // If all seasons same size, set episode-count; otherwise create per-season inputs
+        const epCounts = (data.seasons || []).map(s => (Array.isArray(s.episodes) ? s.episodes.length : 0));
+        const allSame = epCounts.length > 0 && epCounts.every(c => c === epCounts[0]);
+        if (allSame && $('#episode-count')) $('#episode-count').value = epCounts[0] || 1;
+        // update the generated per-season inputs and set values
+        updateSeasonEpisodesUI(); // existing function in your file builds #season-{i}-episodes inputs
+        for (let i = 1; i <= sCount; ++i) {
+          const el = document.getElementById(`season-${i}-episodes`);
+          if (el) {
+            const count = (data.seasons[i - 1] && data.seasons[i - 1].episodes) ? data.seasons[i - 1].episodes.length : (allSame ? $('#episode-count').value : 1);
+            el.value = count;
+          }
+        }
+      }
+
+      // store detailed seasons in temporary variable to be used on save
+      window.__AUTO_PREFILL = data;
+      console.log('=== STORING AUTO-PREFILL DATA ===');
+      console.log('Full auto-prefill data:', data);
+      if (data.seasons && data.seasons[0] && data.seasons[0].episodes && data.seasons[0].episodes[0]) {
+        console.log('First episode in stored data:', data.seasons[0].episodes[0]);
+        console.log('Episode has runtime_seconds:', !!data.seasons[0].episodes[0].runtime_seconds);
+        console.log('Episode has runtime_minutes:', !!data.seasons[0].episodes[0].runtime_minutes);
+      }
+    }
+
+    /* Hook into openAddEditModal from your app.
+       We patch by overriding the existing function name if present, or calling it and then adjusting UI.
+    */
+    (function patchOpenModal() {
+      const originalOpen = window.openAddEditModal || null;
+      window.openAddEditModal = function (show) {
+        // If caller opens edit on existing show, bypass choice and show manual form prefilled
+        // BUT don't clear auto-prefill if we're in auto mode (adding new show with auto data)
+        if (show && !_autoModeActive) {
+          addModeChoice.classList.add('hidden');
+          autoPanel.classList.add('hidden');
+          manualPanel.classList.remove('hidden');
+          if (typeof originalOpen === 'function') originalOpen(show);
+          // make sure to clear auto flags
+          window.__AUTO_PREFILL = null;
+          _autoModeActive = false;
+          return;
+        }
+
+        // Add mode: show choice first
+        addModeChoice.classList.remove('hidden');
+        autoPanel.classList.add('hidden');
+        manualPanel.classList.add('hidden');
+
+        // call original to ensure modal is visible and any global wiring happens
+        if (typeof originalOpen === 'function') originalOpen(show);
+      };
+    })();
+
+    /* Patch saveShow so save uses auto-prefill if available.
+       We wrap existing saveShow with our checks.
+    */
+    (function patchSaveShow() {
+      const originalSave = window.saveShow || null;
+      window.saveShow = function () {
+        console.log('=== SAVESHOW CALLED ===');
+        console.log('Auto-prefill available:', !!window.__AUTO_PREFILL);
+        console.log('Auto-prefill data:', window.__AUTO_PREFILL);
+        
+        // If there is an auto-prefill object (from auto flow) then use it to construct seasons+episodes
+        const auto = window.__AUTO_PREFILL;
+        if (auto) {
+          console.log('=== USING AUTO-PREFILL SAVE PATH ===');
+          // build show object consistent with your state.shows schema
+          const idEl = document.getElementById('show-id');
+          const id = idEl && idEl.value ? idEl.value : `id_${Date.now()}`;
+          const title = document.getElementById('title').value || auto.title || '';
+          const type = (auto.type === 'movie') ? 'movie' : (auto.type === 'anime' ? 'anime' : 'tv');
+          const status = document.getElementById('status') ? document.getElementById('status').value : 'planned';
+          const tags = document.getElementById('tags') ? (document.getElementById('tags').value || '').split(',').map(t => t.trim()).filter(Boolean) : [];
+          const notes = document.getElementById('notes') ? document.getElementById('notes').value : '';
+          const posterData = (auto.poster) ? auto.poster : (document.getElementById('poster-preview') && document.getElementById('poster-preview').style.backgroundImage ? document.getElementById('poster-preview').style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '') : null);
+
+          // normalize seasons -> your schema expects seasons: [{seasonNumber, episodes:[{episodeNumber,title, watched, runtime_seconds, runtime_mmss}]}]
+          console.log('=== NORMALIZATION DEBUG ===');
+          console.log('Auto seasons before normalization:', auto.seasons);
+          if (auto.seasons && auto.seasons[0] && auto.seasons[0].episodes && auto.seasons[0].episodes[0]) {
+            console.log('First episode before normalization:', auto.seasons[0].episodes[0]);
+            console.log('Episode properties:', Object.keys(auto.seasons[0].episodes[0]));
+          }
+
+          const seasons = (auto.seasons || []).map(s => {
+            const normalizedSeason = {
+              seasonNumber: s.season_number || s.seasonNumber,
+              episodes: (s.episodes || []).map(ep => {
+                const normalizedEp = {
+                  episodeNumber: ep.episode_number || ep.episodeNumber,
+                  title: ep.title || ep.name || null,
+                  runtime_seconds: ep.runtime_seconds || (ep.runtime_minutes ? Math.round(ep.runtime_minutes * 60) : null),
+                  runtime_mmss: ep.runtime_mmss || (ep.runtime_minutes ? formatMMSS(Math.round(ep.runtime_minutes * 60)) : null),
+                  watched: false
+                };
+                console.log('Normalizing episode:', ep, '-> normalized:', normalizedEp);
+                return normalizedEp;
+              })
+            };
+            console.log('Normalized season:', normalizedSeason);
+            return normalizedSeason;
+          });
+
+          // create show object with merged description support
+const showObj = {
+  id,
+  title,
+  originalTitle: document.getElementById('original-title')
+    ? document.getElementById('original-title').value || ''
+    : '',
+  type,
+  status,
+  tags,
+  // save description consistently in multiple fields
+  notes: notes || (window._merge_notes || ''),
+  overview: window._merge_notes || notes || '',
+  description: window._merge_notes || notes || '',
+  seasons: window._merge_seasons || seasons,
+  posterDataUrl: window._merge_poster || posterData,
+  raw_auto: window._merge_raw_auto || null,
+  updatedAt: new Date().toISOString(),
+  createdAt:
+    existingIndex === -1
+      ? new Date().toISOString()
+      : (state.shows[existingIndex] &&
+          state.shows[existingIndex].createdAt) ||
+        new Date().toISOString(),
+        overview: notes,   // fallback
+  description: notes, // fallback
+
+  // always save description in 3 places
+  notes: notes || (auto && (auto.overview || auto.description)) || '',
+  overview: (auto && (auto.overview || auto.description)) || notes || '',
+  description: (auto && (auto.description || auto.overview)) || notes || '',
+
+  updatedAt: new Date().toISOString(),
+  createdAt:
+    existingIndex === -1
+      ? new Date().toISOString()
+      : (state.shows[existingIndex] &&
+          state.shows[existingIndex].createdAt) ||
+        new Date().toISOString()
+};
+
+
+          console.log('=== AUTO-PREFILL SAVE DEBUG ===');
+          console.log('Auto-prefill data:', auto);
+          console.log('Auto seasons structure:', auto.seasons);
+          if (auto.seasons && auto.seasons[0] && auto.seasons[0].episodes) {
+            console.log('First episode from auto:', auto.seasons[0].episodes[0]);
+            console.log('Auto episode has runtime_seconds:', !!auto.seasons[0].episodes[0].runtime_seconds);
+            console.log('Auto episode runtime_seconds value:', auto.seasons[0].episodes[0].runtime_seconds);
+          }
+          console.log('Normalized seasons:', seasons);
+          if (seasons && seasons[0] && seasons[0].episodes) {
+            console.log('First normalized episode:', seasons[0].episodes[0]);
+            console.log('Normalized episode has runtime_seconds:', !!seasons[0].episodes[0].runtime_seconds);
+            console.log('Normalized episode runtime_seconds value:', seasons[0].episodes[0].runtime_seconds);
+          }
+          console.log('Final showObj being saved:', showObj);
+          console.log('Final showObj seasons:', showObj.seasons);
+          if (showObj.seasons && showObj.seasons[0] && showObj.seasons[0].episodes) {
+            console.log('Final showObj first episode:', showObj.seasons[0].episodes[0]);
+            console.log('Final episode has runtime_seconds:', !!showObj.seasons[0].episodes[0].runtime_seconds);
+          }
+
+          // insert into app state (state.shows) - your app uses state.shows
+          if (window.state && Array.isArray(window.state.shows)) {
+            const existingIndex = window.state.shows.findIndex(s => s.id === id);
+            if (existingIndex === -1) window.state.shows.push(showObj); else window.state.shows[existingIndex] = showObj;
+            if (typeof saveData === 'function') saveData();
+            if (typeof closeModal === 'function') closeModal();
+            if (typeof render === 'function') render();
+            showToast('Show saved (auto-prefill)', false);
+            // clear auto-prefill after save
+            window.__AUTO_PREFILL = null;
+            _autoModeActive = false;
+            return;
+          }
+        }
+
+        // fallback: call original saveShow (manual path)
+        console.log('=== USING FALLBACK SAVE PATH ===');
+        console.log('Original save function exists:', typeof originalSave === 'function');
+        if (typeof originalSave === 'function') originalSave();
+
+
+
+        const id = elements && elements.showForm && elements.showForm.querySelector('#show-id') && elements.showForm.querySelector('#show-id').value
+  ? elements.showForm.querySelector('#show-id').value
+  : `id_${Date.now()}`;
+
+
+
+
+      };
+    })();
+
+    /* Initialize wiring on DOM ready */
+    document.addEventListener('DOMContentLoaded', () => {
+      wireAutoUI();
+      // ensure openAddEditModal is patched and usable by existing add buttons
+    });
+
+
+
+// Create show object
+      const existingIndex = state.shows.findIndex(s => s.id === id);
+      const now = new Date().toISOString();
+      const showObj = {
+        id, title,
+        originalTitle: elements.showForm.querySelector('#original-title') ? elements.showForm.querySelector('#original-title').value || '' : '',
+        type, status, tags, notes, seasons,
+        posterDataUrl: posterData,
+        updatedAt: now,
+        createdAt: existingIndex === -1 ? now : (state.shows[existingIndex] && state.shows[existingIndex].createdAt) || now
+      };
+
+      console.log('=== AUTO-PREFILL SAVE DEBUG ===');
+      console.log('Final showObj being saved:', showObj);
+      console.log('Final showObj seasons:', showObj.seasons);
+      if (showObj.seasons && showObj.seasons[0] && showObj.seasons[0].episodes) {
+        console.log('Final showObj first episode:', showObj.seasons[0].episodes[0]);
+        console.log('Final episode has runtime_seconds:', !!showObj.seasons[0].episodes[0].runtime_seconds);
+      }
+
+      // Save to state
+      if (existingIndex === -1) state.shows.push(showObj); else state.shows[existingIndex] = showObj;
+      saveData();
+      closeModal();
+      render();
+      showToast('Show saved (auto-prefill)', false);
+
+
+
+// before using it
+const autoDataValue = document.getElementById('auto-data').value;
+
+
+// store detailed seasons in temporary variable to be used on save
+    window.__AUTO_PREFILL = data;
+    console.log('=== STORING AUTO-PREFILL DATA ===');
+    console.log('Full auto-prefill data:', data);
+    if (data.seasons && data.seasons[0] && data.seasons[0].episodes && data.seasons[0].episodes[0]) {
+      console.log('First episode in stored data:', data.seasons[0].episodes[0]);
+      console.log('Episode has runtime_seconds:', !!data.seasons[0].episodes[0].runtime_seconds);
+      console.log('Episode has runtime_minutes:', !!data.seasons[0].episodes[0].runtime_minutes);
+      let data = document.getElementById("auto-data").value;
+
+    }
+  
+
+
+if (!window._openSettingsPageWired) {
+  const el = document.getElementById('open-settings-page');
+  if (el) el.addEventListener('click', () => window.location.href = 'settings.html');
+  window._openSettingsPageWired = true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+  const profileBtn = document.getElementById('profile-btn');
+  const drawer = document.getElementById('settings-drawer');
+  const closeBtn = document.getElementById('close-settings');
+
+  if (profileBtn && drawer) {
+    profileBtn.addEventListener('click', () => drawer.classList.add('open'));
+  }
+  if (closeBtn && drawer) {
+    closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
+  }
+
+  const openSettingsPage = document.getElementById('open-settings-page');
+  if (openSettingsPage) {
+    openSettingsPage.addEventListener('click', () => window.location.href = 'settings.html');
+  }
+
+  const openDashboardBtn = document.getElementById('open-dashboard-btn');
+  if (openDashboardBtn) {
+    openDashboardBtn.addEventListener('click', () => window.location.href = 'dashboard.html');
+  }
+
+  if (profileBtn) {
+    profileBtn.addEventListener('click', () => {
+      if (typeof openSettings === 'function') openSettings();
+      else if (drawer) drawer.classList.add('open');
+    });
+  } else console.warn('profile-btn not found in DOM');
+
+  if (closeBtn && drawer) closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
+  if (openSettingsPage) openSettingsPage.addEventListener('click', () => window.location.href = 'settings.html');
+  if (openDashboardBtn)  openDashboardBtn.addEventListener('click',  () => window.location.href = 'dashboard.html');
+
+});
+
+
+  </script>
+<!-- Injected: robust settings-drawer wiring (added by assistant) -->
+<script>
+(function(){
+  function ensureDrawerWiring(){
+    const profile = document.querySelector('#profile-btn');
+    if (!profile) { console.warn('profile-btn missing'); return; }
+    profile.addEventListener('click', function(e){
+      console.log('profile clicked');
+      let sd = document.querySelector('#settings-drawer');
+      if (!sd) {
+        console.warn('settings-drawer missing. Creating fallback.');
+        sd = document.createElement('div');
+        sd.id = 'settings-drawer';
+        sd.className = 'settings-drawer';
+        sd.innerHTML = '<div class="settings-header"><h2>Menu</h2><button class="btn" id="close-settings">✕</button></div><div class="settings-option"><button class="btn" id="open-settings-page">⚙️ Open Settings page</button></div><div class="settings-option"><button class="btn" id="open-dashboard-btn">📊 Dashboard</button></div>';
+        document.body.appendChild(sd);
+      }
+      sd.classList.add('open');
+    });
+
+    // Close button handler (delegated)
+    document.addEventListener('click', function(ev){
+      if (ev.target.closest && ev.target.closest('#close-settings')) {
+        const sd = document.querySelector('#settings-drawer');
+        if (sd) sd.classList.remove('open');
+      }
+    });
+
+
+
+// wire the recommendations button
+document.addEventListener('click', function (ev) {
+  const el = ev.target.closest && ev.target.closest('#open-recommend-btn');
+  if (!el) return;
+  // navigate to the recommendation page in the same folder
+  window.location.href = 'recommend.html';
+});
+
+
+
+
+
+
+    // Defensive handlers for drawer links using event delegation
+    document.addEventListener('click', function(ev){
+      const s = ev.target.closest && ev.target.closest('#open-settings-page');
+      if (s) { window.location.href = 'settings.html'; return; }
+      const d = ev.target.closest && ev.target.closest('#open-dashboard-btn');
+      if (d) { window.location.href = 'dashboard.html'; return; }
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureDrawerWiring);
+  else ensureDrawerWiring();
+})();
+</script>
+<!-- End injected block -->

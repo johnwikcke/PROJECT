@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3f51b5">
+    <title>Settings - Pop Watch Tracker</title>
+    <style>
+        :root {
+            --input-focus: #2d8cf0;
+            --font-color: #323232;
+            --font-color-sub: #666;
+            --bg-color: #f5f5f5;
+            --main-color: #111111;
+            --accent: #3f51b5;
+            --card: #ffffff;
+            --muted: #9e9e9e;
+            --danger: #f44336;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --border-radius: 8px;
+            --shadow: 4px 4px var(--main-color);
+            --transition: all 0.3s ease;
+        }
+
+        /* Dark Mode Only */
+        :root {
+            --bg-color: #121212;
+            --card: #1e1e1e;
+            --font-color: #f5f5f5;
+            --font-color-sub: #9e9e9e;
+            --main-color: #798a90;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--font-color);
+            background-color: var(--bg-color);
+            transition: var(--transition);
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .settings-header {
+            background-color: var(--card);
+            color: var(--font-color);
+            padding: 16px;
+            position: fixed;
+            left: 16px;
+            right: 16px;
+            top: 16px;
+            z-index: 1000;
+            border: 2px solid var(--main-color);
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            background: var(--card);
+            border: 2px solid var(--main-color);
+            box-shadow: var(--shadow);
+            color: var(--font-color);
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:active {
+            box-shadow: 0px 0px var(--main-color);
+            transform: translate(3px, 3px);
+        }
+
+        .settings-header h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        /* Content */
+        .settings-content {
+            padding-top: 100px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .settings-section {
+            background: var(--card);
+            border: 2px solid var(--main-color);
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin-bottom: 16px;
+            color: var(--accent);
+            border-bottom: 2px solid var(--main-color);
+            padding-bottom: 8px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: var(--font-color);
+        }
+
+        .setting-description {
+            font-size: 0.9rem;
+            color: var(--font-color-sub);
+            margin-top: 4px;
+        }
+
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Form Controls */
+        select,
+        input {
+            padding: 8px 12px;
+            border: 2px solid var(--main-color);
+            border-radius: var(--border-radius);
+            background: var(--card);
+            color: var(--font-color);
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--card);
+            border: 2px solid var(--main-color);
+            box-shadow: var(--shadow);
+            padding: 10px 16px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            color: var(--font-color);
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:active {
+            box-shadow: 0px 0px var(--main-color);
+            transform: translate(3px, 3px);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+
+
+        /* Import/Export */
+        .import-export-area {
+            margin-top: 16px;
+        }
+
+        .data-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 12px;
+            border: 2px solid var(--main-color);
+            border-radius: var(--border-radius);
+            background: var(--card);
+            color: var(--font-color);
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            box-shadow: var(--shadow);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 640px) {
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .setting-control {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="settings-header">
+        <a href="index.html" class="back-btn">← Back</a>
+        <h1>Settings</h1>
+        <a href="dashboard.html" class="back-btn">📊 Dashboard</a>
+    </div>
+
+    <div class="settings-content">
+
+        <!-- Data Management -->
+        <div class="settings-section">
+            <h2 class="section-title">💾 Data Management</h2>
+
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Export Data</div>
+                    <div class="setting-description">Download your data as JSON (works on mobile apps)</div>
+                </div>
+                <div class="setting-control">
+                    <button class="btn btn-primary" id="export-btn">Export</button>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Import Data</div>
+                    <div class="setting-description">Upload data from JSON file or paste JSON</div>
+                </div>
+                <div class="setting-control">
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                    <button class="btn" id="import-file-btn">Choose File</button>
+                    <button class="btn" id="import-text-btn">Paste JSON</button>
+                </div>
+            </div>
+
+            <div class="import-export-area" id="import-area" style="display: none;">
+                <textarea class="data-textarea" id="import-textarea"
+                    placeholder="Paste your JSON data here..."></textarea>
+                <div class="button-group">
+                    <button class="btn btn-success" id="import-confirm">Import Data</button>
+                    <button class="btn" id="import-cancel">Cancel</button>
+                </div>
+            </div>
+
+            <div class="import-export-area" id="export-area" style="display: none;">
+                <textarea class="data-textarea" id="export-textarea" readonly></textarea>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="copy-data">Copy to Clipboard</button>
+                    <button class="btn btn-success" id="download-data">Download File</button>
+                    <button class="btn" id="export-close">Close</button>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Reset All Data</div>
+                    <div class="setting-description">Clear all shows (cannot be undone)</div>
+                </div>
+                <div class="setting-control">
+                    <button class="btn btn-danger" id="reset-data">Reset All</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Basic settings structure (needed for data management)
+        let currentSettings = {};
+
+        // Load any existing settings
+        function loadSettings() {
+            const saved = localStorage.getItem('popSettings');
+            if (saved) {
+                try {
+                    currentSettings = JSON.parse(saved);
+                } catch (e) {
+                    currentSettings = {};
+                }
+            }
+        }
+
+        // Set dark mode
+        document.documentElement.setAttribute('data-theme', 'dark');
+
+        // Real-time data sync
+        function syncData() {
+            // Listen for storage changes to update in real-time
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'popShows') {
+                    // Data changed in another tab, could refresh export if needed
+                    console.log('Data updated in another tab');
+                }
+            });
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            syncData();
+            // Data management
+            setupDataManagement();
+        });
+
+        // Data management functions
+        function setupDataManagement() {
+            // Export
+            document.getElementById('export-btn').addEventListener('click', exportData);
+
+            // Import file
+            document.getElementById('import-file-btn').addEventListener('click', () => {
+                document.getElementById('import-file').click();
+            });
+
+            document.getElementById('import-file').addEventListener('change', handleFileImport);
+
+            // Import text
+            document.getElementById('import-text-btn').addEventListener('click', () => {
+                document.getElementById('import-area').style.display = 'block';
+            });
+
+            document.getElementById('import-confirm').addEventListener('click', importFromText);
+            document.getElementById('import-cancel').addEventListener('click', () => {
+                document.getElementById('import-area').style.display = 'none';
+                document.getElementById('import-textarea').value = '';
+            });
+
+            // Export area
+            document.getElementById('copy-data').addEventListener('click', copyToClipboard);
+            document.getElementById('download-data').addEventListener('click', downloadData);
+            document.getElementById('export-close').addEventListener('click', () => {
+                document.getElementById('export-area').style.display = 'none';
+            });
+
+            // Reset functions
+            document.getElementById('reset-data').addEventListener('click', resetAllData);
+        }
+
+        function exportData() {
+            const data = {
+                shows: JSON.parse(localStorage.getItem('popShows') || '[]'),
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            document.getElementById('export-textarea').value = JSON.stringify(data, null, 2);
+            document.getElementById('export-area').style.display = 'block';
+        }
+
+        function handleFileImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    importData(data);
+                } catch (error) {
+                    alert('Invalid JSON file');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function importFromText() {
+            const text = document.getElementById('import-textarea').value.trim();
+            if (!text) return;
+
+            try {
+                const data = JSON.parse(text);
+                importData(data);
+                document.getElementById('import-area').style.display = 'none';
+                document.getElementById('import-textarea').value = '';
+            } catch (error) {
+                alert('Invalid JSON data');
+            }
+        }
+
+        function importData(data) {
+            if (confirm('This will replace all your current data. Continue?')) {
+                if (data.shows) {
+                    localStorage.setItem('popShows', JSON.stringify(data.shows));
+                }
+                alert('Data imported successfully!');
+            }
+        }
+
+        function copyToClipboard() {
+            const textarea = document.getElementById('export-textarea');
+            textarea.select();
+            document.execCommand('copy');
+            alert('Data copied to clipboard!');
+        }
+
+        function downloadData() {
+            const data = document.getElementById('export-textarea').value;
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pop-watch-tracker-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function resetAllData() {
+            if (confirm('This will delete ALL your shows. This cannot be undone. Continue?')) {
+                localStorage.removeItem('popShows');
+                alert('All data has been reset!');
+            }
+        }
+    </script>
+</body>
+
+</html>

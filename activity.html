@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3f51b5">
+    <title>Pop - Activity</title>
+    <style>
+    /* Reuse existing CSS variables and styles */
+    :root {
+        --input-focus: #2d8cf0;
+        --font-color: #f5f5f5;
+        --font-color-sub: #9e9e9e;
+        --bg-color: #121212;
+        --main-color: #798a90;
+        --accent: #3f51b5;
+        --card: #1e1e1e;
+        --muted: #9e9e9e;
+        --danger: #f44336;
+        --success: #4caf50;
+        --warning: #ff9800;
+        --border-radius: 8px;
+        --shadow: 4px 4px var(--main-color);
+        --transition: all 0.3s ease;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        color: var(--font-color);
+        background-color: var(--bg-color);
+        transition: var(--transition);
+        padding: 16px;
+    }
+
+    .app-container {
+        max-width: 100%;
+        min-height: 100vh;
+        padding-bottom: 60px;
+    }
+
+    /* Header */
+    .app-header {
+        background-color: var(--card);
+        background-color: #111111;
+        color: var(--font-color);
+        color: #abd5e3;
+        padding: 16px;
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        top: 16px;
+        z-index: 1000;
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        border-radius: var(--border-radius);
+        margin-bottom: 0px;
+    }
+
+    .app-header h1 {
+        font-size: 1.5rem;
+        font-weight: 900;
+        display: inline-block;
+    }
+
+    .header-actions {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .header-fab {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--card);
+        color: var(--font-color);
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .header-fab:active {
+        box-shadow: 0px 0px var(--main-color);
+        transform: translate(3px, 3px) translateY(-50%);
+    }
+
+    /* Activity specific styles */
+    .activity-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-top: 100px;
+    }
+
+    .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .activity-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: var(--font-color);
+    }
+
+    .activity-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .filters-card {
+        background-color: var(--card);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        margin-bottom: 24px;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .filter-label {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--font-color-sub);
+    }
+
+    .quick-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .quick-filter {
+        background-color: var(--card);
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        padding: 6px 12px;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .quick-filter.active {
+        background-color: var(--accent);
+        color: white;
+    }
+
+    .date-range-picker {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .date-input {
+        background-color: var(--card);
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        padding: 8px 12px;
+        border-radius: var(--border-radius);
+        color: var(--font-color);
+        font-weight: 600;
+    }
+
+    input, select {
+        background-color: var(--card);
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        padding: 8px 12px;
+        border-radius: var(--border-radius);
+        color: var(--font-color);
+        font-weight: 600;
+    }
+
+    .search-input {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .grouping-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .calendar-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .calendar-container {
+        background-color: var(--card);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        margin-bottom: 24px;
+        display: none;
+    }
+
+    .calendar-container.visible {
+        display: block;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+    }
+
+    .calendar-day {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        cursor: pointer;
+        font-weight: 600;
+        position: relative;
+    }
+
+    .calendar-day.has-activity::after {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        width: 6px;
+        height: 6px;
+        background-color: var(--accent);
+        border-radius: 50%;
+    }
+
+    .calendar-day.active {
+        background-color: var(--accent);
+        color: white;
+    }
+
+    .calendar-day.other-month {
+        opacity: 0.3;
+    }
+
+    .calendar-weekday {
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--font-color-sub);
+        padding: 8px 0;
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .group-header {
+        background-color: var(--card);
+        border-radius: var(--border-radius);
+        padding: 12px 16px;
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        margin-bottom: 8px;
+        font-weight: 900;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .group-count {
+        font-size: 0.9rem;
+        color: var(--font-color-sub);
+        font-weight: 600;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        background-color: var(--card);
+        border-radius: var(--border-radius);
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .activity-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 6px 6px var(--main-color);
+    }
+
+    .activity-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: rgba(63, 81, 181, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        color: var(--accent);
+        flex-shrink: 0;
+    }
+
+    .activity-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .activity-show {
+        font-weight: 700;
+        color: var(--font-color);
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .activity-details {
+        font-size: 0.9rem;
+        color: var(--font-color-sub);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .activity-time {
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-align: right;
+        margin-left: 12px;
+        white-space: nowrap;
+    }
+
+    .activity-context {
+        margin-left: 12px;
+    }
+
+    .context-menu-btn {
+        background: transparent;
+        border: none;
+        color: var(--font-color-sub);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+    }
+
+    .context-menu-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .context-menu {
+        position: absolute;
+        right: 12px;
+        bottom: -80px;
+        background-color: var(--card);
+        border-radius: var(--border-radius);
+        padding: 8px 0;
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        z-index: 10;
+        display: none;
+    }
+
+    .context-menu.visible {
+        display: block;
+    }
+
+    .context-menu-item {
+        padding: 8px 16px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+    }
+
+    .context-menu-item:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .btn {
+        background: var(--card);
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        padding: 8px 12px;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        color: var(--font-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+
+    .btn:active {
+        box-shadow: 0px 0px var(--main-color);
+        transform: translate(3px, 3px);
+    }
+
+    .btn-primary {
+        background-color: var(--accent);
+        color: white;
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-weight: 900;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary:active {
+        box-shadow: 0px 0px var(--main-color);
+        transform: translate(3px, 3px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 16px;
+        color: var(--font-color-sub);
+        background-color: var(--card);
+        border-radius: var(--border-radius);
+        border: 2px solid var(--main-color);
+        box-shadow: var(--shadow);
+    }
+
+    .empty-state h2 {
+        font-weight: 900;
+        margin-bottom: 8px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .activity-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .date-range-picker {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .activity-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .activity-time {
+            margin-left: 0;
+            margin-top: 8px;
+            align-self: flex-end;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .quick-filters {
+            flex-direction: column;
+        }
+        
+        .activity-actions {
+            flex-wrap: wrap;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Pop - Activity</h1>
+            <div class="header-actions">
+                <button class="header-fab" id="back-button" aria-label="Back to Dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="activity-container">
+            <div class="activity-header">
+                <h1 class="activity-title">Activity</h1>
+                <div class="activity-actions">
+                    <button class="btn" id="export-activity">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export
+                    </button>
+                </div>
+            </div>
+
+            <div class="filters-card">
+                <div class="quick-filters">
+                    <button class="quick-filter active" data-filter="all">All</button>
+                    <button class="quick-filter" data-filter="today">Today</button>
+                    <button class="quick-filter" data-filter="week">This Week</button>
+                    <button class="quick-filter" data-filter="month">This Month</button>
+                    <button class="quick-filter" data-filter="year">This Year</button>
+                </div>
+
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Date Range</label>
+                        <div class="date-range-picker">
+                            <input type="date" id="start-date" class="date-input">
+                            <span>to</span>
+                            <input type="date" id="end-date" class="date-input">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Search</label>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search shows...">
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Type</label>
+                        <select id="type-filter">
+                            <option value="all">All Types</option>
+                            <option value="tv">TV Shows</option>
+                            <option value="movie">Movies</option>
+                            <option value="anime">Anime</option>
+                            <option value="web">Web Series</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Group By</label>
+                        <div class="grouping-toggle">
+                            <select id="group-by">
+                                <option value="none">None</option>
+                                <option value="day">Day</option>
+                                <option value="week">Week</option>
+                                <option value="month">Month</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Calendar View</label>
+                    <div class="calendar-toggle">
+                        <button class="btn" id="toggle-calendar">Show Calendar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calendar-container" id="calendar-container">
+                <div class="calendar-header">
+                    <button class="btn" id="prev-month">←</button>
+                    <h3 id="calendar-month">January 2023</h3>
+                    <button class="btn" id="next-month">→</button>
+                </div>
+                <div class="calendar-grid" id="calendar-weekdays">
+                    <div class="calendar-weekday">Sun</div>
+                    <div class="calendar-weekday">Mon</div>
+                    <div class="calendar-weekday">Tue</div>
+                    <div class="calendar-weekday">Wed</div>
+                    <div class="calendar-weekday">Thu</div>
+                    <div class="calendar-weekday">Fri</div>
+                    <div class="calendar-weekday">Sat</div>
+                </div>
+                <div class="calendar-grid" id="calendar-days"></div>
+            </div>
+
+            <div class="activity-list" id="activity-list">
+                <div class="empty-state">
+                    <h2>No activity found</h2>
+                    <p>Try adjusting your filters or add some shows to get started.</p>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination">
+                <button class="btn" id="prev-page" disabled>Previous</button>
+                <span id="page-info">Page 1 of 1</span>
+                <button class="btn" id="next-page" disabled>Next</button>
+            </div>
+        </div>
+
+        <div class="context-menu" id="context-menu">
+            <div class="context-menu-item" data-action="open-show">Open show</div>
+            <div class="context-menu-item" data-action="jump-to-episode">Jump to episode</div>
+            <div class="context-menu-item" data-action="remove-entry">Remove entry</div>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const PAGE_SIZE = 50;
+        let currentPage = 1;
+        let totalPages = 1;
+        let allActivities = [];
+        let filteredActivities = [];
+        let currentCalendarDate = new Date();
+        let activeContextMenu = null;
+
+        // Get data from localStorage (same as index.html)
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('watcher:data:v3');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    return data.shows || [];
+                }
+            } catch (e) {
+                console.warn('Failed to load data:', e);
+            }
+            return [];
+        }
+
+        // Generate activities from shows data
+        function generateActivities(shows) {
+            const activities = [];
+            
+            shows.forEach(show => {
+                // Add show creation activity
+                if (show.createdAt) {
+                    activities.push({
+                        type: 'show_added',
+                        showId: show.id,
+                        showTitle: show.title,
+                        showType: show.type,
+                        timestamp: show.createdAt,
+                        details: 'Added to Watchlist'
+                    });
+                }
+                
+                // Add show update activity
+                if (show.updatedAt && show.updatedAt !== show.createdAt) {
+                    activities.push({
+                        type: 'show_updated',
+                        showId: show.id,
+                        showTitle: show.title,
+                        showType: show.type,
+                        timestamp: show.updatedAt,
+                        details: 'Show updated'
+                    });
+                }
+                
+                // Process seasons and episodes
+                if (show.seasons && Array.isArray(show.seasons)) {
+                    show.seasons.forEach(season => {
+                        if (season.episodes && Array.isArray(season.episodes)) {
+                            let seasonCompleted = true;
+                            
+                            season.episodes.forEach(episode => {
+                                // Add episode watched activity
+                                if (episode.watched && episode.watchedAt) {
+                                    activities.push({
+                                        type: 'episode_watched',
+                                        showId: show.id,
+                                        showTitle: show.title,
+                                        showType: show.type,
+                                        seasonNumber: season.seasonNumber,
+                                        episodeNumber: episode.episodeNumber,
+                                        episodeTitle: episode.title,
+                                        timestamp: episode.watchedAt,
+                                        details: `Watched S${season.seasonNumber}E${episode.episodeNumber}${episode.title ? ' - ' + episode.title : ''}`
+                                    });
+                                } else if (episode.watched && !episode.watchedAt) {
+                                    // Episode marked as watched but no timestamp
+                                    activities.push({
+                                        type: 'episode_completed',
+                                        showId: show.id,
+                                        showTitle: show.title,
+                                        showType: show.type,
+                                        seasonNumber: season.seasonNumber,
+                                        episodeNumber: episode.episodeNumber,
+                                        episodeTitle: episode.title,
+                                        timestamp: show.updatedAt,
+                                        details: `Marked complete S${season.seasonNumber}E${episode.episodeNumber}${episode.title ? ' - ' + episode.title : ''}`
+                                    });
+                                }
+                                
+                                // Check if season is completed
+                                if (!episode.watched) {
+                                    seasonCompleted = false;
+                                }
+                            });
+                            
+                            // Add season completed activity if all episodes are watched
+                            if (seasonCompleted && season.episodes.length > 0) {
+                                // Find the latest watched timestamp in the season
+                                const lastWatched = season.episodes
+                                    .filter(ep => ep.watchedAt)
+                                    .map(ep => new Date(ep.watchedAt))
+                                    .sort((a, b) => b - a)[0];
+                                
+                                activities.push({
+                                    type: 'season_completed',
+                                    showId: show.id,
+                                    showTitle: show.title,
+                                    showType: show.type,
+                                    seasonNumber: season.seasonNumber,
+                                    timestamp: lastWatched ? lastWatched.toISOString() : show.updatedAt,
+                                    details: `Completed Season ${season.seasonNumber}`
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Sort activities by timestamp (newest first)
+            return activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+
+        // Query activities with filters
+        function queryActivities({from, to, type, search, group, limit, offset}) {
+            let results = [...allActivities];
+            
+            // Filter by date range
+            if (from) {
+                const fromDate = new Date(from);
+                results = results.filter(activity => new Date(activity.timestamp) >= fromDate);
+            }
+            
+            if (to) {
+                const toDate = new Date(to);
+                toDate.setHours(23, 59, 59, 999); // End of day
+                results = results.filter(activity => new Date(activity.timestamp) <= toDate);
+            }
+            
+            // Filter by type
+            if (type && type !== 'all') {
+                results = results.filter(activity => activity.showType === type);
+            }
+            
+            // Filter by search term
+            if (search) {
+                const searchTerm = search.toLowerCase();
+                results = results.filter(activity => 
+                    activity.showTitle.toLowerCase().includes(searchTerm) ||
+                    activity.details.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Apply pagination
+            const total = results.length;
+            if (limit) {
+                results = results.slice(offset || 0, (offset || 0) + limit);
+            }
+            
+            return {
+                total,
+                items: results
+            };
+        }
+
+        // Format time ago (reuse from dashboard)
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 30) return `${diffDays} days ago`;
+            
+            const diffMonths = Math.floor(diffDays / 30);
+            if (diffMonths < 12) return `${diffMonths} months ago`;
+            
+            const diffYears = Math.floor(diffMonths / 12);
+            return `${diffYears} years ago`;
+        }
+
+        // Render activity list
+        function renderActivityList(items, options = {}) {
+            const activityList = document.getElementById('activity-list');
+            activityList.innerHTML = '';
+            
+            if (items.length === 0) {
+                activityList.innerHTML = `
+                    <div class="empty-state">
+                        <h2>No activity found</h2>
+                        <p>Try adjusting your filters or add some shows to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let groupedItems = items;
+            
+            // Group items if requested
+            if (options.groupBy && options.groupBy !== 'none') {
+                const groups = {};
+                
+                items.forEach(item => {
+                    const date = new Date(item.timestamp);
+                    let groupKey;
+                    
+                    if (options.groupBy === 'day') {
+                        groupKey = date.toDateString();
+                    } else if (options.groupBy === 'week') {
+                        // Get week number and year
+                        const weekStart = new Date(date);
+                        weekStart.setDate(date.getDate() - date.getDay());
+                        groupKey = `Week of ${weekStart.toDateString()}`;
+                    } else if (options.groupBy === 'month') {
+                        groupKey = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                    }
+                    
+                    if (!groups[groupKey]) {
+                        groups[groupKey] = [];
+                    }
+                    
+                    groups[groupKey].push(item);
+                });
+                
+                // Render groups
+                Object.keys(groups).sort((a, b) => {
+                    // Sort groups chronologically (newest first)
+                    if (options.groupBy === 'day') {
+                        return new Date(b) - new Date(a);
+                    } else if (options.groupBy === 'week') {
+                        return new Date(b.split('of ')[1]) - new Date(a.split('of ')[1]);
+                    } else if (options.groupBy === 'month') {
+                        return new Date(b) - new Date(a);
+                    }
+                    return 0;
+                }).forEach(groupKey => {
+                    const group = document.createElement('div');
+                    group.className = 'group-header';
+                    group.innerHTML = `
+                        <span>${groupKey}</span>
+                        <span class="group-count">${groups[groupKey].length} activities</span>
+                    `;
+                    activityList.appendChild(group);
+                    
+                    groups[groupKey].forEach(item => {
+                        activityList.appendChild(createActivityItem(item));
+                    });
+                });
+            } else {
+                // Render without grouping
+                items.forEach(item => {
+                    activityList.appendChild(createActivityItem(item));
+                });
+            }
+        }
+
+        // Create individual activity item
+        function createActivityItem(activity) {
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.dataset.id = activity.showId;
+            if (activity.seasonNumber !== undefined) {
+                item.dataset.season = activity.seasonNumber;
+            }
+            if (activity.episodeNumber !== undefined) {
+                item.dataset.episode = activity.episodeNumber;
+            }
+            
+            let iconSvg = '';
+            switch (activity.type) {
+                case 'episode_watched':
+                case 'episode_completed':
+                    iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+                    break;
+                case 'season_completed':
+                    iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="8 12 11 15 16 10"></polyline></svg>';
+                    break;
+                case 'show_added':
+                    iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>';
+                    break;
+                case 'show_updated':
+                    iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+                    break;
+            }
+            
+            const timestamp = new Date(activity.timestamp);
+            const timeAgo = getTimeAgo(timestamp);
+            const exactTime = timestamp.toLocaleString();
+            
+            item.innerHTML = `
+                <div class="activity-icon">${iconSvg}</div>
+                <div class="activity-content">
+                    <div class="activity-show">${activity.showTitle}</div>
+                    <div class="activity-details">${activity.details}</div>
+                </div>
+                <div class="activity-time" title="${exactTime}">${timeAgo}</div>
+                <div class="activity-context">
+                    <button class="context-menu-btn">⋯</button>
+                </div>
+            `;
+            
+            // Add context menu handler
+            const contextBtn = item.querySelector('.context-menu-btn');
+            const contextMenu = document.getElementById('context-menu');
+            
+            contextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                // Close any open context menu
+                if (activeContextMenu) {
+                    activeContextMenu.classList.remove('visible');
+                }
+                
+                // Position and show context menu
+                const rect = contextBtn.getBoundingClientRect();
+                contextMenu.style.top = `${rect.bottom + window.scrollY}px`;
+                contextMenu.style.left = `${rect.left + window.scrollX}px`;
+                contextMenu.classList.add('visible');
+                activeContextMenu = contextMenu;
+                
+                // Store reference to this activity item
+                contextMenu.dataset.targetId = activity.showId;
+                if (activity.seasonNumber !== undefined) {
+                    contextMenu.dataset.targetSeason = activity.seasonNumber;
+                }
+                if (activity.episodeNumber !== undefined) {
+                    contextMenu.dataset.targetEpisode = activity.episodeNumber;
+                }
+            });
+            
+            return item;
+        }
+
+        // Render calendar view
+        function renderCalendar(activities) {
+            const calendarDays = document.getElementById('calendar-days');
+            const calendarMonth = document.getElementById('calendar-month');
+            calendarDays.innerHTML = '';
+            
+            // Set month header
+            calendarMonth.textContent = currentCalendarDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            // Get first day of month and last day of month
+            const firstDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth(), 1);
+            const lastDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 0);
+            
+            // Get day of week for first day (0 = Sunday, 6 = Saturday)
+            const firstDayOfWeek = firstDay.getDay();
+            
+            // Get days in previous month
+            const prevMonthLastDay = new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth(), 0).getDate();
+            
+            // Create empty cells for days before the first day of the month
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = prevMonthLastDay - firstDayOfWeek + i + 1;
+                calendarDays.appendChild(day);
+            }
+            
+            // Create cells for days in the month
+            for (let i = 1; i <= lastDay.getDate(); i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                day.textContent = i;
+                day.dataset.day = i;
+                day.dataset.month = currentCalendarDate.getMonth() + 1;
+                day.dataset.year = currentCalendarDate.getFullYear();
+                
+                // Check if this day has any activities
+                const dateStr = `${currentCalendarDate.getFullYear()}-${String(currentCalendarDate.getMonth() + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const hasActivity = activities.some(activity => {
+                    const activityDate = new Date(activity.timestamp);
+                    const activityDateStr = `${activityDate.getFullYear()}-${String(activityDate.getMonth() + 1).padStart(2, '0')}-${String(activityDate.getDate()).padStart(2, '0')}`;
+                    return activityDateStr === dateStr;
+                });
+                
+                if (hasActivity) {
+                    day.classList.add('has-activity');
+                }
+                
+                // Add click handler to filter by this day
+                day.addEventListener('click', () => {
+                    // Update date filters
+                    document.getElementById('start-date').value = dateStr;
+                    document.getElementById('end-date').value = dateStr;
+                    
+                    // Update quick filter
+                    document.querySelectorAll('.quick-filter').forEach(btn => btn.classList.remove('active'));
+                    
+                    // Apply filters
+                    applyFilters();
+                });
+                
+                calendarDays.appendChild(day);
+            }
+            
+            // Fill remaining cells with next month's days
+            const totalCells = 42; // 6 rows x 7 days
+            const remainingCells = totalCells - (firstDayOfWeek + lastDay.getDate());
+            
+            for (let i = 1; i <= remainingCells; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = i;
+                calendarDays.appendChild(day);
+            }
+        }
+
+        // Export activities to JSON
+        function exportActivities(items) {
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                filters: getCurrentFilters(),
+                activities: items
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pop-activity-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Get current filter values
+        function getCurrentFilters() {
+            return {
+                from: document.getElementById('start-date').value,
+                to: document.getElementById('end-date').value,
+                type: document.getElementById('type-filter').value,
+                search: document.getElementById('search-input').value,
+                group: document.getElementById('group-by').value
+            };
+        }
+
+        // Apply filters and update view
+        function applyFilters() {
+            const filters = getCurrentFilters();
+            
+            // Query activities with current filters
+            const result = queryActivities({
+                from: filters.from,
+                to: filters.to,
+                type: filters.type,
+                search: filters.search,
+                limit: PAGE_SIZE,
+                offset: (currentPage - 1) * PAGE_SIZE
+            });
+            
+            filteredActivities = result.items;
+            totalPages = Math.ceil(result.total / PAGE_SIZE);
+            
+            // Update pagination
+            updatePagination();
+            
+            // Render activities
+            renderActivityList(filteredActivities, { groupBy: filters.group });
+            
+            // Update calendar if visible
+            if (document.getElementById('calendar-container').classList.contains('visible')) {
+                renderCalendar(allActivities);
+            }
+        }
+
+        // Update pagination controls
+        function updatePagination() {
+            const prevBtn = document.getElementById('prev-page');
+            const nextBtn = document.getElementById('next-page');
+            const pageInfo = document.getElementById('page-info');
+            
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages;
+            
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages || 1}`;
+        }
+
+        // Parse URL parameters for deep linking
+        function parseUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const filters = {};
+            
+            if (params.has('from')) {
+                document.getElementById('start-date').value = params.get('from');
+                filters.from = params.get('from');
+            }
+            
+            if (params.has('to')) {
+                document.getElementById('end-date').value = params.get('to');
+                filters.to = params.get('to');
+            }
+            
+            if (params.has('type')) {
+                document.getElementById('type-filter').value = params.get('type');
+                filters.type = params.get('type');
+            }
+            
+            if (params.has('search')) {
+                document.getElementById('search-input').value = params.get('search');
+                filters.search = params.get('search');
+            }
+            
+            if (params.has('group')) {
+                document.getElementById('group-by').value = params.get('group');
+                filters.group = params.get('group');
+            }
+            
+            return filters;
+        }
+
+        // Initialize the activity page
+        function initActivityPage() {
+            // Load data
+            const shows = loadData();
+            
+            // Generate activities
+            allActivities = generateActivities(shows);
+            
+            // Parse URL parameters
+            const urlFilters = parseUrlParams();
+            
+            // Set up event listeners
+            document.getElementById('back-button').addEventListener('click', () => {
+                window.location.href = 'dashboard.html';
+            });
+            
+            document.getElementById('export-activity').addEventListener('click', () => {
+                exportActivities(filteredActivities);
+            });
+            
+            // Quick filters
+            document.querySelectorAll('.quick-filter').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.quick-filter').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const today = new Date();
+                    let fromDate = null;
+                    let toDate = null;
+                    
+                    switch (btn.dataset.filter) {
+                        case 'today':
+                            fromDate = new Date(today);
+                            fromDate.setHours(0, 0, 0, 0);
+                            toDate = new Date(today);
+                            toDate.setHours(23, 59, 59, 999);
+                            break;
+                        case 'week':
+                            fromDate = new Date(today);
+                            fromDate.setDate(today.getDate() - today.getDay());
+                            fromDate.setHours(0, 0, 0, 0);
+                            toDate = new Date(today);
+                            toDate.setDate(today.getDate() + (6 - today.getDay()));
+                            toDate.setHours(23, 59, 59, 999);
+                            break;
+                        case 'month':
+                            fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                            toDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                            toDate.setHours(23, 59, 59, 999);
+                            break;
+                        case 'year':
+                            fromDate = new Date(today.getFullYear(), 0, 1);
+                            toDate = new Date(today.getFullYear(), 11, 31);
+                            toDate.setHours(23, 59, 59, 999);
+                            break;
+                        case 'all':
+                        default:
+                            // No date filters for 'all'
+                            break;
+                    }
+                    
+                    // Update date inputs
+                    if (fromDate && toDate) {
+                        document.getElementById('start-date').value = fromDate.toISOString().split('T')[0];
+                        document.getElementById('end-date').value = toDate.toISOString().split('T')[0];
+                    } else {
+                        document.getElementById('start-date').value = '';
+                        document.getElementById('end-date').value = '';
+                    }
+                    
+                    // Reset to first page
+                    currentPage = 1;
+                    
+                    // Apply filters
+                    applyFilters();
+                });
+            });
+            
+            // Filter inputs
+            document.getElementById('start-date').addEventListener('change', applyFilters);
+            document.getElementById('end-date').addEventListener('change', applyFilters);
+            document.getElementById('type-filter').addEventListener('change', applyFilters);
+            document.getElementById('search-input').addEventListener('input', applyFilters);
+            document.getElementById('group-by').addEventListener('change', applyFilters);
+            
+            // Pagination
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    applyFilters();
+                }
+            });
+            
+            document.getElementById('next-page').addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    applyFilters();
+                }
+            });
+            
+            // Calendar
+            document.getElementById('toggle-calendar').addEventListener('click', () => {
+                const calendar = document.getElementById('calendar-container');
+                const btn = document.getElementById('toggle-calendar');
+                
+                if (calendar.classList.contains('visible')) {
+                    calendar.classList.remove('visible');
+                    btn.textContent = 'Show Calendar';
+                } else {
+                    calendar.classList.add('visible');
+                    btn.textContent = 'Hide Calendar';
+                    renderCalendar(allActivities);
+                }
+            });
+            
+            document.getElementById('prev-month').addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+                renderCalendar(allActivities);
+            });
+            
+            document.getElementById('next-month').addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+                renderCalendar(allActivities);
+            });
+            
+            // Context menu
+            document.addEventListener('click', () => {
+                if (activeContextMenu) {
+                    activeContextMenu.classList.remove('visible');
+                    activeContextMenu = null;
+                }
+            });
+            
+            document.querySelectorAll('.context-menu-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    const menu = document.getElementById('context-menu');
+                    const showId = menu.dataset.targetId;
+                    const seasonNumber = menu.dataset.targetSeason;
+                    const episodeNumber = menu.dataset.targetEpisode;
+                    
+                    switch (item.dataset.action) {
+                        case 'open-show':
+                            window.location.href = `index.html#show-${showId}`;
+                            break;
+                        case 'jump-to-episode':
+                            if (seasonNumber && episodeNumber) {
+                                window.location.href = `index.html#show-${showId}&season-${seasonNumber}&episode-${episodeNumber}`;
+                            } else {
+                                window.location.href = `index.html#show-${showId}`;
+                            }
+                            break;
+                        case 'remove-entry':
+                            // This would require modifying the data model to support hiding activities
+                            alert('Remove functionality would be implemented here');
+                            break;
+                    }
+                    
+                    menu.classList.remove('visible');
+                    activeContextMenu = null;
+                });
+            });
+            
+            // Apply initial filters
+            applyFilters();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set dark mode
+            document.documentElement.setAttribute('data-theme', 'dark');
+            initActivityPage();
+        });
+    </script>
+</body>
+</html>
